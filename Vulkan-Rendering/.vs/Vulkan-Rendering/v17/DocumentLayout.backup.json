@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "F:\\Repos\\LW-Vulkan\\Vulkan-Rendering\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|F:\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\TriangleApplication.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\TriangleApplication.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|F:\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\Vulkan-Rendering.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\Vulkan-Rendering.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
@@ -14,19 +18,31 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Vulkan-Rendering.cpp",
               "DocumentMoniker": "F:\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\Vulkan-Rendering.cpp",
               "RelativeDocumentMoniker": "src\\Vulkan-Rendering.cpp",
               "ToolTip": "F:\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\Vulkan-Rendering.cpp",
               "RelativeToolTip": "src\\Vulkan-Rendering.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-02-15T01:10:51.566Z",
+              "WhenOpened": "2025-02-15T13:12:44.183Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "TriangleApplication.h",
+              "DocumentMoniker": "F:\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\TriangleApplication.h",
+              "RelativeDocumentMoniker": "src\\TriangleApplication.h",
+              "ToolTip": "F:\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\TriangleApplication.h",
+              "RelativeToolTip": "src\\TriangleApplication.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-02-15T13:09:37.289Z",
               "EditorCaption": ""
             }
           ]
