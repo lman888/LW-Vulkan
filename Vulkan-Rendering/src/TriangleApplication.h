@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <optional>
+#include <fstream>
 
 struct QueueFamilyIndices
 {
@@ -81,6 +82,10 @@ private:
     VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
     VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
     void CreateSwapChain();
+    void CreateImageViews();
+    void CreateGraphicsPipeline();
+    static std::vector<char> ReadFile(const std::string& fileName);
+    VkShaderModule CreateShaderModule(const std::vector<char>& code);
     
     GLFWwindow* window = nullptr;
 
@@ -101,6 +106,7 @@ private:
     std::vector<VkImage> swapChainImages;
     VkFormat swapChainImageFormat;
     VkExtent2D swapChainExtent;
+    std::vector<VkImageView> swapChainImageViews;
     
 #ifdef NDEBUG
     const bool enableValidationLayers = false;
