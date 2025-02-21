@@ -107,6 +107,7 @@ private:
     VkFormat swapChainImageFormat;
     VkExtent2D swapChainExtent;
     std::vector<VkImageView> swapChainImageViews;
+    VkPipelineLayout pipelineLayout;
     
 #ifdef NDEBUG
     const bool enableValidationLayers = false;
