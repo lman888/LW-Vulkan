@@ -86,6 +86,13 @@ private:
     void CreateGraphicsPipeline();
     static std::vector<char> ReadFile(const std::string& fileName);
     VkShaderModule CreateShaderModule(const std::vector<char>& code);
+    void CreateRenderPass();
+    void CreateFrameBuffers();
+    void CreateCommandPool();
+    void CreateCommandBuffer();
+    void RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+    void DrawFrame();
+    void CreateSyncObjects();
     
     GLFWwindow* window = nullptr;
 
@@ -94,6 +101,7 @@ private:
 
     const std::vector<const char*> validationLayers = { "VK_LAYER_KHRONOS_validation" };
     const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+    std::vector<VkFramebuffer> swapChainFrameBuffers;
 
     VkInstance instance;
     VkDevice device;
@@ -107,7 +115,14 @@ private:
     VkFormat swapChainImageFormat;
     VkExtent2D swapChainExtent;
     std::vector<VkImageView> swapChainImageViews;
+    VkRenderPass renderPass;
     VkPipelineLayout pipelineLayout;
+    VkPipeline graphicsPipeline;
+    VkCommandPool commandPool;
+    VkCommandBuffer commandBuffer;
+    VkSemaphore imageAvailableSemaphore;
+    VkSemaphore renderFinishedSemaphore;
+    VkFence inFlightFence;
     
 #ifdef NDEBUG
     const bool enableValidationLayers = false;
