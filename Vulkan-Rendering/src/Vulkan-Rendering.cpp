@@ -7,11 +7,11 @@
 #include <glm/mat4x4.hpp>
 
 #include <iostream>
-#include "TriangleApplication.h"
+#include "VulkanDevice.h"
 
 int main(int argc, char* argv[])
 {
-    TriangleApplication app;
+    VulkanDevice app;
 
     try
     {

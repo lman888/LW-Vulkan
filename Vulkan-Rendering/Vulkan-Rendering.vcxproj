@@ -179,7 +179,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\TriangleApplication.cpp">
+    <ClCompile Include="src\Vulkan-Rendering.cpp" />
+    <ClCompile Include="src\VulkanDevice.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <Optimization>Disabled</Optimization>
@@ -200,6 +201,7 @@
       <EnableFuzzer>false</EnableFuzzer>
       <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <EnableVectorLength>NotSet</EnableVectorLength>
       <FloatingPointModel>Precise</FloatingPointModel>
       <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
       <GenerateModuleDependencies>false</GenerateModuleDependencies>
@@ -209,7 +211,7 @@
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <IgnoreStandardIncludePath>false</IgnoreStandardIncludePath>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <LanguageStandard_C>Default</LanguageStandard_C>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <MinimalRebuild>false</MinimalRebuild>
       <ModuleDependenciesFile>Vulkan-Rendering\x64\Debug\</ModuleDependenciesFile>
       <ModuleOutputFile>Vulkan-Rendering\x64\Debug\</ModuleOutputFile>
@@ -251,13 +253,12 @@
       <DisableAnalyzeExternal>false</DisableAnalyzeExternal>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_UNICODE;UNICODE;</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>F:\Repos\LW-Vulkan\Vulkan-Rendering\Dependencies\GLFW\include;F:\Repos\LW-Vulkan\Vulkan-Rendering\Dependencies\GLM\include;F:\Repos\LW-Vulkan\Vulkan-Rendering\Dependencies\Vulkan\include;F:\Repos\LW-Vulkan\Vulkan-Rendering\Dependencies\GLFW\include;F:\Repos\LW-Vulkan\Vulkan-Rendering\Dependencies\GLM\include;F:\Repos\LW-Vulkan\Vulkan-Rendering\Dependencies\Vulkan\include;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>F:\Repos\LW-Vulkan\Vulkan-Rendering\Dependencies\GLFW\include;F:\Repos\LW-Vulkan\Vulkan-Rendering\Dependencies\GLM\include;F:\Repos\LW-Vulkan\Vulkan-Rendering\Dependencies\Vulkan\include;F:\Repos\LW-Vulkan\Vulkan-Rendering\Dependencies\GLFW\include;F:\Repos\LW-Vulkan\Vulkan-Rendering\Dependencies\GLM\include;F:\Repos\LW-Vulkan\Vulkan-Rendering\Dependencies\Vulkan\include;;F:\Repos\LW-Vulkan\Vulkan-Rendering\Dependencies\GLFW\include;F:\Repos\LW-Vulkan\Vulkan-Rendering\\Dependencies\Vulkan\include;Dependencies\GLM\include</AdditionalIncludeDirectories>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
-    <ClCompile Include="src\Vulkan-Rendering.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\TriangleApplication.h" />
+    <ClInclude Include="src\VulkanDevice.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

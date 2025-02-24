@@ -1,4 +1,5 @@
-﻿#include "TriangleApplication.h"
+﻿#include "VulkanDevice.h"
+
 #include <iostream>
 #include <queue>
 #include <set>
@@ -7,7 +8,15 @@
 #include <algorithm>
 #include <complex>
 
-void TriangleApplication::RunApplication()
+VulkanDevice::VulkanDevice()
+{
+}
+
+VulkanDevice::~VulkanDevice()
+{
+}
+
+void VulkanDevice::RunApplication()
 {
     InitWindow();
     InitVulkan();
@@ -15,7 +24,7 @@ void TriangleApplication::RunApplication()
     CleanUp();
 }
 
-void TriangleApplication::InitWindow()
+void VulkanDevice::InitWindow()
 {
     glfwInit();
 
@@ -25,7 +34,7 @@ void TriangleApplication::InitWindow()
     window = glfwCreateWindow(WIDTH, HEIGHT, "LW - Vulkan Renderer", nullptr, nullptr);
 }
 
-void TriangleApplication::InitVulkan()
+void VulkanDevice::InitVulkan()
 {
     CreateInstance();
     SetupDebugMessenger();
@@ -42,7 +51,7 @@ void TriangleApplication::InitVulkan()
     CreateSyncObjects();
 }
 
-void TriangleApplication::MainLoop()
+void VulkanDevice::MainLoop()
 {
     while(glfwWindowShouldClose(window) == false)
     {
@@ -53,7 +62,7 @@ void TriangleApplication::MainLoop()
     vkDeviceWaitIdle(device);
 }
 
-void TriangleApplication::CleanUp()
+void VulkanDevice::CleanUp()
 {
     vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
     vkDestroySemaphore(device, renderFinishedSemaphore, nullptr);
@@ -110,7 +119,7 @@ void TriangleApplication::CleanUp()
  *
  * See vkCreateInstance(3) Manual Page for additional information
  */
-void TriangleApplication::CreateInstance()
+void VulkanDevice::CreateInstance()
 {
     if (enableValidationLayers && CheckValidationLayerSupport() == false)
     {
@@ -173,7 +182,7 @@ void TriangleApplication::CreateInstance()
  * The Validation Layer is included in the Vulkan SDK which we need to enable it by name, this is called VK_LAYER_KHRONOS_validation.
  * This is the main khronos validation layer. This layer enables us to verify our application is correctly using the Vulkan API.
  */
-bool TriangleApplication::CheckValidationLayerSupport()
+bool VulkanDevice::CheckValidationLayerSupport()
 {
     uint32_t layerCount;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -199,7 +208,7 @@ bool TriangleApplication::CheckValidationLayerSupport()
     return layerFound;
 }
 
-std::vector<const char*> TriangleApplication::GetRequiredExtensions()
+std::vector<const char*> VulkanDevice::GetRequiredExtensions()
 {
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
@@ -214,17 +223,16 @@ std::vector<const char*> TriangleApplication::GetRequiredExtensions()
     return extentions;
 }
 
-VkBool32 TriangleApplication::DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                                            VkDebugUtilsMessageTypeFlagsEXT messageType,
-                                            const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-                                            void* pUserData)
+VkBool32 VulkanDevice::DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+    VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+    void* pUserData)
 {
     std::cerr << "Validation Layer: " << pCallbackData->pMessage << "\n";
     
     return VK_FALSE;
 }
 
-void TriangleApplication::SetupDebugMessenger()
+void VulkanDevice::SetupDebugMessenger()
 {
     if (enableValidationLayers == false)
     {
@@ -240,7 +248,7 @@ void TriangleApplication::SetupDebugMessenger()
     }
 }
 
-void TriangleApplication::PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
+void VulkanDevice::PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
 {
     createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -264,7 +272,7 @@ void TriangleApplication::PopulateDebugMessengerCreateInfo(VkDebugUtilsMessenger
  * Another aspect of finding a suitable device is Queue Families. Queue families each have their own subset of commands. Example, there could be a queue family that only allows processing of compute commands, or one that allows
  * memory transfer related commands.
  */
-void TriangleApplication::PickPhysicalDevice()
+void VulkanDevice::PickPhysicalDevice()
 {
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
@@ -292,7 +300,7 @@ void TriangleApplication::PickPhysicalDevice()
     }
 }
 
-bool TriangleApplication::IsDeviceSuitable(VkPhysicalDevice device)
+bool VulkanDevice::IsDeviceSuitable(VkPhysicalDevice device)
 {
     VkPhysicalDeviceProperties deviceProperties;
     vkGetPhysicalDeviceProperties(device, &deviceProperties);
@@ -313,7 +321,7 @@ bool TriangleApplication::IsDeviceSuitable(VkPhysicalDevice device)
     return indices.IsComplete() && extensionsSupported && swapChainAdequate;
 }
 
-QueueFamilyIndices TriangleApplication::FindQueueFamilies(VkPhysicalDevice device)
+QueueFamilyIndices VulkanDevice::FindQueueFamilies(VkPhysicalDevice device)
 {
     QueueFamilyIndices indices;
 
@@ -350,7 +358,7 @@ QueueFamilyIndices TriangleApplication::FindQueueFamilies(VkPhysicalDevice devic
     return indices;
 }
 
-SwapChainSupportDetails TriangleApplication::QuerySwapChainSupport(VkPhysicalDevice device)
+SwapChainSupportDetails VulkanDevice::QuerySwapChainSupport(VkPhysicalDevice device)
 {
     SwapChainSupportDetails details;
 
@@ -382,7 +390,7 @@ SwapChainSupportDetails TriangleApplication::QuerySwapChainSupport(VkPhysicalDev
  *
  * A Logical device represents an instance of the implementation with its own state and resources independant of other logical devices.
  */
-void TriangleApplication::CreateLogicalDevice()
+void VulkanDevice::CreateLogicalDevice()
 {
     QueueFamilyIndices indices = FindQueueFamilies(physicalDevice);
 
@@ -437,7 +445,7 @@ void TriangleApplication::CreateLogicalDevice()
  *
  * The Window Surface needs to be created right after the instance creation, because it can actually influence the physical device selection. 
  */
-void TriangleApplication::CreateSurface()
+void VulkanDevice::CreateSurface()
 {
     if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
     {
@@ -445,7 +453,7 @@ void TriangleApplication::CreateSurface()
     }
 }
 
-bool TriangleApplication::CheckDeviceExtensionSupport(VkPhysicalDevice device)
+bool VulkanDevice::CheckDeviceExtensionSupport(VkPhysicalDevice device)
 {
     uint32_t extensionCount;
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -463,7 +471,7 @@ bool TriangleApplication::CheckDeviceExtensionSupport(VkPhysicalDevice device)
     return requiredExtensions.empty();
 }
 
-VkSurfaceFormatKHR TriangleApplication::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
+VkSurfaceFormatKHR VulkanDevice::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
 {
     for (const auto& availableFormat : availableFormats)
     {
@@ -476,7 +484,7 @@ VkSurfaceFormatKHR TriangleApplication::ChooseSwapSurfaceFormat(const std::vecto
     return availableFormats[0];
 }
 
-VkPresentModeKHR TriangleApplication::ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
+VkPresentModeKHR VulkanDevice::ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
 {
     for (const auto& availablePresentMode : availablePresentModes)
     {
@@ -488,7 +496,7 @@ VkPresentModeKHR TriangleApplication::ChooseSwapPresentMode(const std::vector<Vk
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-VkExtent2D TriangleApplication::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
+VkExtent2D VulkanDevice::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
 {
     if (capabilities.currentExtent.width != (std::numeric_limits<uint32_t>::max)())
     {
@@ -517,9 +525,9 @@ VkExtent2D TriangleApplication::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR&
  * How exactly the queue works and the conditions for presenting an image from the queue depend on how the swap chain is set up, but the general purpose of the swap chain is to synchronize the presentation of images with the refresh
  * rate of the screen.
  */
-void TriangleApplication::CreateSwapChain()
+void VulkanDevice::CreateSwapChain()
 {
-    SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport(physicalDevice);
+        SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport(physicalDevice);
 
     VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = ChooseSwapPresentMode(swapChainSupport.presentModes);
@@ -581,7 +589,7 @@ void TriangleApplication::CreateSwapChain()
 /*
  * An Image View is quite literally a view into an image. It describes how to access the image and which part of the image to access, for example if it should be treated as a 2D texture depth texture without any mipmapping levels.
  */
-void TriangleApplication::CreateImageViews()
+void VulkanDevice::CreateImageViews()
 {
     swapChainImageViews.resize(swapChainImages.size());
 
@@ -646,9 +654,9 @@ void TriangleApplication::CreateImageViews()
  *
  * In Vulkan we must create the entire graphics pipeline from scratch. The disadvantage of this is how many pipelines we may have to make (A lot of work), the benefits is we have essentially complete control.
  */
-void TriangleApplication::CreateGraphicsPipeline()
+void VulkanDevice::CreateGraphicsPipeline()
 {
-    auto vertShaderCode = ReadFile("shaders/vert.spv");
+        auto vertShaderCode = ReadFile("shaders/vert.spv");
     auto fragShaderCode = ReadFile("shaders/frag.spv");
 
     VkShaderModule vertShaderModule = CreateShaderModule(vertShaderCode);
@@ -778,7 +786,7 @@ void TriangleApplication::CreateGraphicsPipeline()
     vkDestroyShaderModule(device, vertShaderModule, nullptr);
 }
 
-std::vector<char> TriangleApplication::ReadFile(const std::string& fileName)
+std::vector<char> VulkanDevice::ReadFile(const std::string& fileName)
 {
     std::ifstream file(fileName, std::ios::ate | std::ios::binary);
     
@@ -798,7 +806,7 @@ std::vector<char> TriangleApplication::ReadFile(const std::string& fileName)
     return buffer;
 }
 
-VkShaderModule TriangleApplication::CreateShaderModule(const std::vector<char>& code)
+VkShaderModule VulkanDevice::CreateShaderModule(const std::vector<char>& code)
 {
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -818,7 +826,7 @@ VkShaderModule TriangleApplication::CreateShaderModule(const std::vector<char>& 
  * We need to tell Vulkan about the framebuffer attachments that will be used while rendering. We need to specify how many color and depth buffers there will be, how many samples to use for each of them and how their contents should be handled throughout the rendering operations.
  * All of that information is wrapped into a Render Pass object.
  */
-void TriangleApplication::CreateRenderPass()
+void VulkanDevice::CreateRenderPass()
 {
     VkAttachmentDescription colorAttachment{};
     colorAttachment.format = swapChainImageFormat;
@@ -868,7 +876,7 @@ void TriangleApplication::CreateRenderPass()
  * A Framebuffer object references all the VkImageView objects that represent the attachments. In this case that will be our color attachment. However, the image that we have to use for the attachment depends on which image
  * the swap chain returns when we retrieve one for presentation. That means that we have to create a framebuffer for all the images in the swap chain and use the one that corresponds to the retrieved image at drawing time.
  */
-void TriangleApplication::CreateFrameBuffers()
+void VulkanDevice::CreateFrameBuffers()
 {
     swapChainFrameBuffers.resize(swapChainImageViews.size());
 
@@ -895,7 +903,7 @@ void TriangleApplication::CreateFrameBuffers()
 /*
  * The Command Pool manages the memory that is used to store the buffers and command buffers are allocated from there.
  */
-void TriangleApplication::CreateCommandPool()
+void VulkanDevice::CreateCommandPool()
 {
     QueueFamilyIndices queueFamilyIndices = FindQueueFamilies(physicalDevice);
 
@@ -915,7 +923,7 @@ void TriangleApplication::CreateCommandPool()
  * The advantage to this is when we are ready to tell Vulkan what we want to do, all the commands are submitted together and Vulkan can more efficiently process the commands since all of them are available together.
  * This also allows commands to be recorded to happen in multiple threads if we desire.
  */
-void TriangleApplication::CreateCommandBuffer()
+void VulkanDevice::CreateCommandBuffer()
 {
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -929,7 +937,7 @@ void TriangleApplication::CreateCommandBuffer()
     }
 }
 
-void TriangleApplication::RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+void VulkanDevice::RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 {
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -988,7 +996,7 @@ void TriangleApplication::RecordCommandBuffer(VkCommandBuffer commandBuffer, uin
  * - Submit the recorded command buffer
  * - Present the swap chain image
  */
-void TriangleApplication::DrawFrame()
+void VulkanDevice::DrawFrame()
 {
     vkWaitForFences(device, 1, &inFlightFence, VK_TRUE, UINT64_MAX);
 
@@ -1036,7 +1044,7 @@ void TriangleApplication::DrawFrame()
     vkQueuePresentKHR(presentQueue, &presentInfo);
 }
 
-void TriangleApplication::CreateSyncObjects()
+void VulkanDevice::CreateSyncObjects()
 {
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;

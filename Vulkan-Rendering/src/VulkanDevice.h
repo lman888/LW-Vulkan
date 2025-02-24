@@ -52,12 +52,16 @@ inline void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMesse
     }
 }
 
-class TriangleApplication
+class VulkanDevice
 {
 public:
+    VulkanDevice();
+    ~VulkanDevice();
+    
     void RunApplication();
-
+    
 private:
+
     void InitWindow();
     void InitVulkan();
     void MainLoop();
@@ -93,7 +97,7 @@ private:
     void RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
     void DrawFrame();
     void CreateSyncObjects();
-    
+
     GLFWwindow* window = nullptr;
 
     const uint32_t WIDTH = 800;
