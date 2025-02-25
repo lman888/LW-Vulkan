@@ -1,31 +1,58 @@
-# Prerequisites
-*.d
-
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-
-# Executables
+# Compiled binary files
 *.exe
 *.out
 *.app
+*.dylib
+*.so
+*.a
+*.dll
+
+# Build artifacts
+/build/
+/bin/
+/obj/
+/CMakeFiles/
+CMakeCache.txt
+Makefile
+*.o
+*.lo
+*.la
+*.gch
+*.pch
+
+# Visual Studio
+*.sln
+*.vcxproj*
+*.ncb
+*.sdf
+*.opensdf
+*.suo
+*.filters
+*.user
+
+# Xcode
+*.xcworkspace/
+*.xcuserstate
+*.xcuserdata/
+
+# Qt Creator
+*.pro.user
+*.pro.user.*
+*.moc
+
+# Unreal Engine
+*.uproject.user
+/Saved/
+/Intermediate/
+/.vs/
+
+# Code::Blocks
+*.layout
+
+# JetBrains IDEs
+.idea/
+*.iml
+
+# Other OS-specific files
+.DS_Store
+Thumbs.db
