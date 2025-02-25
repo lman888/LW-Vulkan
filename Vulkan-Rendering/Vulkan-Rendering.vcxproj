@@ -179,6 +179,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\DeviceQuery.cpp" />
     <ClCompile Include="src\Vulkan-Rendering.cpp" />
     <ClCompile Include="src\VulkanDevice.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
@@ -256,9 +257,14 @@
       <AdditionalIncludeDirectories>F:\Repos\LW-Vulkan\Vulkan-Rendering\Dependencies\GLFW\include;F:\Repos\LW-Vulkan\Vulkan-Rendering\Dependencies\GLM\include;F:\Repos\LW-Vulkan\Vulkan-Rendering\Dependencies\Vulkan\include;F:\Repos\LW-Vulkan\Vulkan-Rendering\Dependencies\GLFW\include;F:\Repos\LW-Vulkan\Vulkan-Rendering\Dependencies\GLM\include;F:\Repos\LW-Vulkan\Vulkan-Rendering\Dependencies\Vulkan\include;;F:\Repos\LW-Vulkan\Vulkan-Rendering\Dependencies\GLFW\include;F:\Repos\LW-Vulkan\Vulkan-Rendering\\Dependencies\Vulkan\include;Dependencies\GLM\include</AdditionalIncludeDirectories>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="src\VulkanInstance.cpp" />
+    <ClCompile Include="src\VulkanSurface.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\DeviceQuery.h" />
     <ClInclude Include="src\VulkanDevice.h" />
+    <ClInclude Include="src\VulkanInstance.h" />
+    <ClInclude Include="src\VulkanSurface.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
