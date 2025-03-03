@@ -1,10 +1,6 @@
 ﻿#pragma once
 
-#define VK_USE_PLATFORM_WIN32_KHR
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3native.h>
+#include "VulkanIncludes.h"
 
 #include <vector>
 #include <optional>
@@ -14,6 +10,7 @@
 #include "DeviceQuery.h"
 #include "VulkanInstance.h"
 #include "VulkanSurface.h"
+#include "SwapChain.h"
 
 class VulkanDevice
 {
@@ -29,9 +26,7 @@ private:
     void InitVulkan();
     void MainLoop();
     void CleanUp();
-    VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
     VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
-    VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
     void CreateSwapChain();
     void CreateImageViews();
     void CreateGraphicsPipeline();
@@ -52,10 +47,6 @@ private:
     
     std::vector<VkFramebuffer> swapChainFrameBuffers;
     
-    VkSwapchainKHR swapChain;
-    std::vector<VkImage> swapChainImages;
-    VkFormat swapChainImageFormat;
-    VkExtent2D swapChainExtent;
     std::vector<VkImageView> swapChainImageViews;
     VkRenderPass renderPass;
     VkPipelineLayout pipelineLayout;
@@ -66,7 +57,8 @@ private:
     VkSemaphore renderFinishedSemaphore;
     VkFence inFlightFence;
 
-    DeviceQuery VdeviceQuery;
+    DeviceQuery VDeviceQuery;
     VulkanInstance VInstance;
     VulkanSurface VSurface;
+    SwapChain VSwapChain;
 };

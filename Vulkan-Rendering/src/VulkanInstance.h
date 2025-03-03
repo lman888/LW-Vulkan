@@ -1,8 +1,7 @@
 ﻿#pragma once
 
-#define GLFW_INCLUDE_VULKAN
+#include "VulkanIncludes.h"
 #include <vector>
-#include <GLFW/glfw3.h>
 
 using std::vector;
 

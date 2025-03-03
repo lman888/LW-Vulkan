@@ -259,12 +259,15 @@
     </ClCompile>
     <ClCompile Include="src\VulkanInstance.cpp" />
     <ClCompile Include="src\VulkanSurface.cpp" />
+    <ClCompile Include="src\SwapChain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DeviceQuery.h" />
     <ClInclude Include="src\VulkanDevice.h" />
+    <ClInclude Include="src\VulkanIncludes.h" />
     <ClInclude Include="src\VulkanInstance.h" />
     <ClInclude Include="src\VulkanSurface.h" />
+    <ClInclude Include="src\SwapChain.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

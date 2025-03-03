@@ -1,6 +1,7 @@
 ﻿#include "DeviceQuery.h"
 #include <iostream>
 #include <vector>
+#include "SwapChain.h"
 #include "set"
 
 DeviceQuery::DeviceQuery()
@@ -23,7 +24,7 @@ DeviceQuery::~DeviceQuery()
  * Another aspect of finding a suitable device is Queue Families. Queue families each have their own subset of commands. Example, there could be a queue family that only allows processing of compute commands, or one that allows
  * memory transfer related commands.
  */
-void DeviceQuery::PickPhysicalDevice(VkInstance instance, VkSurfaceKHR surface)
+void DeviceQuery::PickPhysicalDevice(VkInstance instance, VkSurfaceKHR surface, SwapChain swapChain)
 {
     uint32_t deviceCount = 0;
     vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
@@ -38,7 +39,7 @@ void DeviceQuery::PickPhysicalDevice(VkInstance instance, VkSurfaceKHR surface)
 
     for (const auto& device : devices)
     {
-        if (IsDeviceSuitable(device, surface))
+        if (IsDeviceSuitable(device, surface, swapChain))
         {
             physicalDevice = device;
             break;
@@ -160,34 +161,7 @@ QueueFamilyIndices DeviceQuery::FindQueueFamilies(VkPhysicalDevice device, VkSur
     return indices;
 }
 
-SwapChainSupportDetails DeviceQuery::QuerySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface)
-{
-    SwapChainSupportDetails details;
-
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities);
-
-    uint32_t formatCount;
-    vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.formats.data());
-
-    if (formatCount != 0)
-    {
-        details.formats.resize(formatCount);
-        vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.formats.data());
-    }
-
-    uint32_t presentModeCount;
-    vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);
-
-    if (presentModeCount != 0)
-    {
-        details.presentModes.resize(presentModeCount);
-        vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.presentModes.data());
-    }
-    
-    return details;
-}
-
-bool DeviceQuery::IsDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface)
+bool DeviceQuery::IsDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface, SwapChain swapChain)
 {
     VkPhysicalDeviceProperties deviceProperties;
     vkGetPhysicalDeviceProperties(device, &deviceProperties);
@@ -201,7 +175,7 @@ bool DeviceQuery::IsDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface
     bool swapChainAdequate = false;
     if (extensionsSupported)
     {
-        SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport(device, surface);
+        SwapChainSupportDetails swapChainSupport = swapChain.QuerySwapChainSupport(device, surface);
         swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
     }
     

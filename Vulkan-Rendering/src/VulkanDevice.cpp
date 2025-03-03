@@ -39,8 +39,10 @@ void VulkanDevice::InitVulkan()
     VInstance.CreateVulkanInstance();
     VInstance.SetupDebugMessenger();
     VSurface.CreateSurface(VInstance.GetVulkanInstance(), window);
-    VdeviceQuery.PickPhysicalDevice(VInstance.GetVulkanInstance(), VSurface.GetVulkanSurface());
-    VdeviceQuery.CreateLogicalDevice(VSurface.GetVulkanSurface(), VInstance.GetEnableValidation(), VInstance.GetValidationLayers());
+    VDeviceQuery.PickPhysicalDevice(VInstance.GetVulkanInstance(), VSurface.GetVulkanSurface(), VSwapChain);
+    VDeviceQuery.CreateLogicalDevice(VSurface.GetVulkanSurface(), VInstance.GetEnableValidation(), VInstance.GetValidationLayers());
+    VSwapChain.CreateSwapChain(VDeviceQuery, VSurface);
+
     
     CreateSwapChain();
     CreateImageViews();
@@ -60,35 +62,35 @@ void VulkanDevice::MainLoop()
         DrawFrame();
     }
 
-    vkDeviceWaitIdle(VdeviceQuery.GetChosenDevice());
+    vkDeviceWaitIdle(VDeviceQuery.GetChosenDevice());
 }
 
 void VulkanDevice::CleanUp()
 {
-    vkDestroySemaphore(VdeviceQuery.GetChosenDevice(), imageAvailableSemaphore, nullptr);
-    vkDestroySemaphore(VdeviceQuery.GetChosenDevice(), renderFinishedSemaphore, nullptr);
-    vkDestroyFence(VdeviceQuery.GetChosenDevice(), inFlightFence, nullptr);
+    vkDestroySemaphore(VDeviceQuery.GetChosenDevice(), imageAvailableSemaphore, nullptr);
+    vkDestroySemaphore(VDeviceQuery.GetChosenDevice(), renderFinishedSemaphore, nullptr);
+    vkDestroyFence(VDeviceQuery.GetChosenDevice(), inFlightFence, nullptr);
     
-    vkDestroyCommandPool(VdeviceQuery.GetChosenDevice(), commandPool, nullptr);
+    vkDestroyCommandPool(VDeviceQuery.GetChosenDevice(), commandPool, nullptr);
     
     for (auto frameBuffer : swapChainFrameBuffers)
     {
-        vkDestroyFramebuffer(VdeviceQuery.GetChosenDevice(), frameBuffer, nullptr);
+        vkDestroyFramebuffer(VDeviceQuery.GetChosenDevice(), frameBuffer, nullptr);
     }
     
-    vkDestroyPipeline(VdeviceQuery.GetChosenDevice(), graphicsPipeline, nullptr);
-    vkDestroyPipelineLayout(VdeviceQuery.GetChosenDevice(), pipelineLayout, nullptr);
+    vkDestroyPipeline(VDeviceQuery.GetChosenDevice(), graphicsPipeline, nullptr);
+    vkDestroyPipelineLayout(VDeviceQuery.GetChosenDevice(), pipelineLayout, nullptr);
 
-    vkDestroyRenderPass(VdeviceQuery.GetChosenDevice(), renderPass, nullptr);
+    vkDestroyRenderPass(VDeviceQuery.GetChosenDevice(), renderPass, nullptr);
 
     for (auto imageView : swapChainImageViews)
     {
-        vkDestroyImageView(VdeviceQuery.GetChosenDevice(), imageView, nullptr);
+        vkDestroyImageView(VDeviceQuery.GetChosenDevice(), imageView, nullptr);
     }
     
-    vkDestroySwapchainKHR(VdeviceQuery.GetChosenDevice(), swapChain, nullptr);
+    vkDestroySwapchainKHR(VDeviceQuery.GetChosenDevice(), VSwapChain.GetSwapChain(), nullptr);
     
-    vkDestroyDevice(VdeviceQuery.GetChosenDevice(), nullptr);
+    vkDestroyDevice(VDeviceQuery.GetChosenDevice(), nullptr);
     
     if (VInstance.GetEnableValidation())
     {
@@ -104,19 +106,6 @@ void VulkanDevice::CleanUp()
     glfwTerminate();
 }
 
-VkSurfaceFormatKHR VulkanDevice::ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
-{
-    for (const auto& availableFormat : availableFormats)
-    {
-        if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB && availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
-        {
-            return availableFormat;
-        }
-    }
-    
-    return availableFormats[0];
-}
-
 VkPresentModeKHR VulkanDevice::ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
 {
     for (const auto& availablePresentMode : availablePresentModes)
@@ -127,129 +116,6 @@ VkPresentModeKHR VulkanDevice::ChooseSwapPresentMode(const std::vector<VkPresent
         }
     }
     return VK_PRESENT_MODE_FIFO_KHR;
-}
-
-VkExtent2D VulkanDevice::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
-{
-    if (capabilities.currentExtent.width != (std::numeric_limits<uint32_t>::max)())
-    {
-        return capabilities.currentExtent;
-    }
-    else
-    {
-        int width, height;
-        glfwGetFramebufferSize(window, &width, &height);
-
-        VkExtent2D actualExtent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
-
-        actualExtent.width = std::clamp(actualExtent.width,capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-        actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
-        
-        return actualExtent;
-    }
-}
-
-/*
- * Vulkan does not have the concept of a "default framebuffer", hence it requires an infrastructure that will own the buffers we will render to before we visualize them on the screen. This infrastructure is known as Swap Chain.
- * and must be created explicitly by Vulkan.
- *
- * The Swap Chain is essentially a queue of images that are waiting to be presented to the screen. Our application will acquire such an image to draw to it, and then return it to the queue.
- *
- * How exactly the queue works and the conditions for presenting an image from the queue depend on how the swap chain is set up, but the general purpose of the swap chain is to synchronize the presentation of images with the refresh
- * rate of the screen.
- */
-void VulkanDevice::CreateSwapChain()
-{
-    SwapChainSupportDetails swapChainSupport = VdeviceQuery.QuerySwapChainSupport(VdeviceQuery.GetPhysicalDevice(), VSurface.GetVulkanSurface());
-
-    VkSurfaceFormatKHR surfaceFormat = ChooseSwapSurfaceFormat(swapChainSupport.formats);
-    VkPresentModeKHR presentMode = ChooseSwapPresentMode(swapChainSupport.presentModes);
-    VkExtent2D extent = ChooseSwapExtent(swapChainSupport.capabilities);
-
-    //We include the +1 because it may take drivers time to complete internal operations
-    uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
-
-    if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount)
-    {
-        imageCount = swapChainSupport.capabilities.maxImageCount;
-    }
-
-    VkSwapchainCreateInfoKHR createInfo{};
-    createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    createInfo.surface = VSurface.GetVulkanSurface();
-    createInfo.minImageCount = imageCount;
-    createInfo.imageFormat = surfaceFormat.format;
-    createInfo.imageColorSpace = surfaceFormat.colorSpace;
-    createInfo.imageExtent = extent;
-    createInfo.imageArrayLayers = 1;
-    createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
-    QueueFamilyIndices indices = VdeviceQuery.FindQueueFamilies(VdeviceQuery.GetPhysicalDevice(), VSurface.GetVulkanSurface());
-    uint32_t queueFamilyIndices[] { indices.graphicsFamily.value(), indices.presentFamily.value() };
-
-    if (indices.graphicsFamily != indices.presentFamily)
-    {
-        createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-        createInfo.queueFamilyIndexCount = 2;
-        createInfo.pQueueFamilyIndices = queueFamilyIndices;
-    }
-    else
-    {
-        createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        createInfo.queueFamilyIndexCount = 0; //optional
-        createInfo.pQueueFamilyIndices = nullptr; //optional
-    }
-
-    createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
-    createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    createInfo.presentMode = presentMode;
-    createInfo.clipped = VK_TRUE;
-    createInfo.oldSwapchain = VK_NULL_HANDLE;
-
-    if (vkCreateSwapchainKHR(VdeviceQuery.GetChosenDevice(), &createInfo, nullptr, &swapChain) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to Create a Swap Chain!");
-    }
-
-    vkGetSwapchainImagesKHR(VdeviceQuery.GetChosenDevice(), swapChain, &imageCount, nullptr);
-    swapChainImages.resize(imageCount);
-    vkGetSwapchainImagesKHR(VdeviceQuery.GetChosenDevice(), swapChain, &imageCount, swapChainImages.data());
-    
-    swapChainImageFormat = surfaceFormat.format;
-    swapChainExtent = extent;
-}
-
-/*
- * An Image View is quite literally a view into an image. It describes how to access the image and which part of the image to access, for example if it should be treated as a 2D texture depth texture without any mipmapping levels.
- */
-void VulkanDevice::CreateImageViews()
-{
-    swapChainImageViews.resize(swapChainImages.size());
-
-    for (size_t i = 0; i < swapChainImages.size(); i++)
-    {
-        VkImageViewCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        createInfo.image = swapChainImages[i];
-        createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        createInfo.format = swapChainImageFormat;
-
-        createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-        createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-        createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-        createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-
-        createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        createInfo.subresourceRange.baseMipLevel = 0;
-        createInfo.subresourceRange.levelCount = 1;
-        createInfo.subresourceRange.baseArrayLayer = 0;
-        createInfo.subresourceRange.layerCount = 1;
-
-        if (vkCreateImageView(VdeviceQuery.GetChosenDevice(), &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS)
-        {
-            throw std::runtime_error("Failed to create Image Views!");
-        }
-    }
 }
 
 /*
@@ -387,7 +253,7 @@ void VulkanDevice::CreateGraphicsPipeline()
     pipelineLayoutInfo.pushConstantRangeCount = 0;
     pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
-    if (vkCreatePipelineLayout(VdeviceQuery.GetChosenDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+    if (vkCreatePipelineLayout(VDeviceQuery.GetChosenDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create Pipeline Layout!");
     }
@@ -410,13 +276,13 @@ void VulkanDevice::CreateGraphicsPipeline()
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; //Optional
     pipelineInfo.basePipelineIndex = -1; //Optional
 
-    if (vkCreateGraphicsPipelines(VdeviceQuery.GetChosenDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS)
+    if (vkCreateGraphicsPipelines(VDeviceQuery.GetChosenDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create a Graphics Pipeline!");
     }
     
-    vkDestroyShaderModule(VdeviceQuery.GetChosenDevice(), fragShaderModule, nullptr);
-    vkDestroyShaderModule(VdeviceQuery.GetChosenDevice(), vertShaderModule, nullptr);
+    vkDestroyShaderModule(VDeviceQuery.GetChosenDevice(), fragShaderModule, nullptr);
+    vkDestroyShaderModule(VDeviceQuery.GetChosenDevice(), vertShaderModule, nullptr);
 }
 
 std::vector<char> VulkanDevice::ReadFile(const std::string& fileName)
@@ -447,7 +313,7 @@ VkShaderModule VulkanDevice::CreateShaderModule(const std::vector<char>& code)
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
     VkShaderModule shaderModule;
-    if (vkCreateShaderModule(VdeviceQuery.GetChosenDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+    if (vkCreateShaderModule(VDeviceQuery.GetChosenDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create Shader Module!");
     }
@@ -497,7 +363,7 @@ void VulkanDevice::CreateRenderPass()
     renderPassInfo.dependencyCount = 1;
     renderPassInfo.pDependencies = &dependency;
     
-    if (vkCreateRenderPass(VdeviceQuery.GetChosenDevice(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS)
+    if (vkCreateRenderPass(VDeviceQuery.GetChosenDevice(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create a Render Pass!");
     }
@@ -526,7 +392,7 @@ void VulkanDevice::CreateFrameBuffers()
         frameBufferInfo.height = swapChainExtent.height;
         frameBufferInfo.layers = 1;
 
-        if (vkCreateFramebuffer(VdeviceQuery.GetChosenDevice(), &frameBufferInfo, nullptr, &swapChainFrameBuffers[i]) != VK_SUCCESS)
+        if (vkCreateFramebuffer(VDeviceQuery.GetChosenDevice(), &frameBufferInfo, nullptr, &swapChainFrameBuffers[i]) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create a Framebuffer!");
         }
@@ -538,14 +404,14 @@ void VulkanDevice::CreateFrameBuffers()
  */
 void VulkanDevice::CreateCommandPool()
 {
-    QueueFamilyIndices queueFamilyIndices = VdeviceQuery.FindQueueFamilies(VdeviceQuery.GetPhysicalDevice(), VSurface.GetVulkanSurface());
+    QueueFamilyIndices queueFamilyIndices = VDeviceQuery.FindQueueFamilies(VDeviceQuery.GetPhysicalDevice(), VSurface.GetVulkanSurface());
 
     VkCommandPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
-    if (vkCreateCommandPool(VdeviceQuery.GetChosenDevice(), &poolInfo, nullptr, &commandPool) != VK_SUCCESS)
+    if (vkCreateCommandPool(VDeviceQuery.GetChosenDevice(), &poolInfo, nullptr, &commandPool) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create Command Pool!");
     }
@@ -564,7 +430,7 @@ void VulkanDevice::CreateCommandBuffer()
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = 1;
 
-    if (vkAllocateCommandBuffers(VdeviceQuery.GetChosenDevice(), &allocInfo, &commandBuffer) != VK_SUCCESS)
+    if (vkAllocateCommandBuffers(VDeviceQuery.GetChosenDevice(), &allocInfo, &commandBuffer) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to allocate Command Buffers!");
     }
@@ -631,12 +497,12 @@ void VulkanDevice::RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t i
  */
 void VulkanDevice::DrawFrame()
 {
-    vkWaitForFences(VdeviceQuery.GetChosenDevice(), 1, &inFlightFence, VK_TRUE, UINT64_MAX);
+    vkWaitForFences(VDeviceQuery.GetChosenDevice(), 1, &inFlightFence, VK_TRUE, UINT64_MAX);
 
-    vkResetFences(VdeviceQuery.GetChosenDevice(), 1, &inFlightFence);
+    vkResetFences(VDeviceQuery.GetChosenDevice(), 1, &inFlightFence);
 
     uint32_t imageIndex;
-    vkAcquireNextImageKHR(VdeviceQuery.GetChosenDevice(), swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+    vkAcquireNextImageKHR(VDeviceQuery.GetChosenDevice(), VSwapChain.GetSwapChain(), UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
 
     vkResetCommandBuffer(commandBuffer, 0);
 
@@ -658,7 +524,7 @@ void VulkanDevice::DrawFrame()
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    if (vkQueueSubmit(VdeviceQuery.GetGraphicsQueue(), 1, &submitInfo, inFlightFence) != VK_SUCCESS)
+    if (vkQueueSubmit(VDeviceQuery.GetGraphicsQueue(), 1, &submitInfo, inFlightFence) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to submit Draw Command Buffer!");
     }
@@ -668,13 +534,13 @@ void VulkanDevice::DrawFrame()
     presentInfo.waitSemaphoreCount = 1;
     presentInfo.pWaitSemaphores = signalSemaphores;
 
-    VkSwapchainKHR swapChains[] = { swapChain };
+    VkSwapchainKHR swapChains[] = { VSwapChain.GetSwapChain() };
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = &imageIndex;
     presentInfo.pResults = nullptr; //Optional
 
-    vkQueuePresentKHR(VdeviceQuery.GetPresentQueue(), &presentInfo);
+    vkQueuePresentKHR(VDeviceQuery.GetPresentQueue(), &presentInfo);
 }
 
 void VulkanDevice::CreateSyncObjects()
@@ -686,9 +552,9 @@ void VulkanDevice::CreateSyncObjects()
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
     
-    if (vkCreateSemaphore(VdeviceQuery.GetChosenDevice(), &semaphoreInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS ||
-        vkCreateSemaphore(VdeviceQuery.GetChosenDevice(), &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS ||
-        vkCreateFence(VdeviceQuery.GetChosenDevice(), &fenceInfo, nullptr, &inFlightFence) != VK_SUCCESS)
+    if (vkCreateSemaphore(VDeviceQuery.GetChosenDevice(), &semaphoreInfo, nullptr, &imageAvailableSemaphore) != VK_SUCCESS ||
+        vkCreateSemaphore(VDeviceQuery.GetChosenDevice(), &semaphoreInfo, nullptr, &renderFinishedSemaphore) != VK_SUCCESS ||
+        vkCreateFence(VDeviceQuery.GetChosenDevice(), &fenceInfo, nullptr, &inFlightFence) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create Semaphores!");
     }

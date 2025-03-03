@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+#include "VulkanIncludes.h"
 
 class VulkanSurface
 {
@@ -12,6 +11,8 @@ public:
     void CreateSurface(VkInstance instance, GLFWwindow* window);
 
     VkSurfaceKHR GetVulkanSurface();
+
+    VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
     
 private:
 

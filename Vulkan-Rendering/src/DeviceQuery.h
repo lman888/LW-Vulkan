@@ -1,12 +1,11 @@
 ﻿#pragma once
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+#include "VulkanIncludes.h"
 
 #include <optional>
-#include <vector>
 
 using std::vector;
+class SwapChain;
 
 struct QueueFamilyIndices
 {
@@ -19,12 +18,6 @@ struct QueueFamilyIndices
     }
 };
 
-struct SwapChainSupportDetails
-{
-    VkSurfaceCapabilitiesKHR capabilities;
-    std::vector<VkSurfaceFormatKHR> formats;
-    std::vector <VkPresentModeKHR> presentModes;
-};
 
 /* 
  * The purpose of this class is to query the best GPU based on what functionality it supports with Vulkan and provide it to the Main Vulkan Application
@@ -35,7 +28,7 @@ public:
     DeviceQuery();
     ~DeviceQuery();
 
-    void PickPhysicalDevice(VkInstance instance, VkSurfaceKHR surface);
+    void PickPhysicalDevice(VkInstance instance, VkSurfaceKHR surface, SwapChain swapChain);
     void CreateLogicalDevice(VkSurfaceKHR surface, bool enableValidationLayers, std::vector<const char*> validationLayers);
     
     VkDevice GetChosenDevice() const;
@@ -44,7 +37,6 @@ public:
     VkQueue GetPresentQueue() const;
 
     QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface);
-    SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface);
 
 private:
 
@@ -54,6 +46,6 @@ private:
     VkPhysicalDevice physicalDevice;
     const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
-    bool IsDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface);
+    bool IsDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface, SwapChain swapChain);
     bool CheckDeviceExtensionSupport(VkPhysicalDevice device) const;
 };
