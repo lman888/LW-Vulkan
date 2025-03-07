@@ -25,13 +25,13 @@ SwapChain::~SwapChain()
  * How exactly the queue works and the conditions for presenting an image from the queue depend on how the swap chain is set up, but the general purpose of the swap chain is to synchronize the presentation of images with the refresh
  * rate of the screen.
  */
-void SwapChain::CreateSwapChain(DeviceQuery deviceQuery, VulkanSurface surface)
+void SwapChain::CreateSwapChain(DeviceQuery deviceQuery, VulkanSurface surface, GLFWwindow* window)
 {
     SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport(deviceQuery.GetPhysicalDevice(), surface.GetVulkanSurface());
 
     VkSurfaceFormatKHR surfaceFormat = surface.ChooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = ChooseSwapPresentMode(swapChainSupport.presentModes);
-    VkExtent2D extent = ChooseSwapExtent(swapChainSupport.capabilities);
+    VkExtent2D extent = ChooseSwapExtent(swapChainSupport.capabilities, window);
 
     //We include the +1 because it may take drivers time to complete internal operations
     uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
@@ -118,42 +118,10 @@ SwapChainSupportDetails SwapChain::QuerySwapChainSupport(VkPhysicalDevice device
     return details;
 }
 
-VkPresentModeKHR SwapChain::ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
-{
-    for (const auto& availablePresentMode : availablePresentModes)
-    {
-        if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
-        {
-            return availablePresentMode;
-        }
-    }
-    return VK_PRESENT_MODE_FIFO_KHR;
-}
-
-VkExtent2D SwapChain::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
-{
-    if (capabilities.currentExtent.width != (std::numeric_limits<uint32_t>::max)())
-    {
-        return capabilities.currentExtent;
-    }
-    else
-    {
-        int width, height;
-        glfwGetFramebufferSize(window, &width, &height);
-
-        VkExtent2D actualExtent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
-
-        actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-        actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
-
-        return actualExtent;
-    }
-}
-
 /*
  * An Image View is quite literally a view into an image. It describes how to access the image and which part of the image to access, for example if it should be treated as a 2D texture depth texture without any mipmapping levels.
  */
-void SwapChain::CreateImageViews()
+void SwapChain::CreateImageViews(DeviceQuery deviceQuery)
 {
     swapChainImageViews.resize(swapChainImages.size());
 
@@ -176,9 +144,66 @@ void SwapChain::CreateImageViews()
         createInfo.subresourceRange.baseArrayLayer = 0;
         createInfo.subresourceRange.layerCount = 1;
 
-        if (vkCreateImageView(VDeviceQuery.GetChosenDevice(), &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS)
+        if (vkCreateImageView(deviceQuery.GetChosenDevice(), &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create Image Views!");
         }
+    }
+}
+
+std::vector<VkFramebuffer> SwapChain::GetSwapChainFrameBuffer()
+{
+    return swapChainFrameBuffers;
+}
+
+std::vector<VkImageView> SwapChain::GetSwapChainImageViews()
+{
+    return swapChainImageViews;
+}
+
+std::vector<VkImage> SwapChain::GetSwapChainImages()
+{
+    return swapChainImages;
+}
+
+VkFormat SwapChain::GetSwapChainImageFormat()
+{
+    return swapChainImageFormat;
+}
+
+VkExtent2D SwapChain::GetSwapChainImageExtent()
+{
+    return swapChainExtent;
+}
+
+VkPresentModeKHR SwapChain::ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
+{
+    for (const auto& availablePresentMode : availablePresentModes)
+    {
+        if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR)
+        {
+            return availablePresentMode;
+        }
+    }
+    return VK_PRESENT_MODE_FIFO_KHR;
+}
+
+VkExtent2D SwapChain::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, GLFWwindow* window)
+{
+    if (capabilities.currentExtent.width != (std::numeric_limits<uint32_t>::max)())
+    {
+        return capabilities.currentExtent;
+    }
+    else
+    {
+        int width, height;
+        glfwGetFramebufferSize(window, &width, &height);
+
+        VkExtent2D actualExtent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
+
+        actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
+        actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+
+        return actualExtent;
     }
 }

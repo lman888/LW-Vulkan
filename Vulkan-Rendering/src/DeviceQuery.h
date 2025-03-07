@@ -3,8 +3,8 @@
 #include "VulkanIncludes.h"
 
 #include <optional>
+#include <vector>
 
-using std::vector;
 class SwapChain;
 
 struct QueueFamilyIndices

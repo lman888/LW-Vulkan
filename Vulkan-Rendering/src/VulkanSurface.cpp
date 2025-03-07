@@ -45,8 +45,3 @@ VkSurfaceFormatKHR VulkanSurface::ChooseSwapSurfaceFormat(const std::vector<VkSu
 
     return availableFormats[0];
 }
-
-VkSurfaceFormatKHR VulkanSurface::Choose()
-{
-    return VkSurfaceFormatKHR();
-}

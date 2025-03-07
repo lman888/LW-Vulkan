@@ -41,11 +41,9 @@ void VulkanDevice::InitVulkan()
     VSurface.CreateSurface(VInstance.GetVulkanInstance(), window);
     VDeviceQuery.PickPhysicalDevice(VInstance.GetVulkanInstance(), VSurface.GetVulkanSurface(), VSwapChain);
     VDeviceQuery.CreateLogicalDevice(VSurface.GetVulkanSurface(), VInstance.GetEnableValidation(), VInstance.GetValidationLayers());
-    VSwapChain.CreateSwapChain(VDeviceQuery, VSurface);
+    VSwapChain.CreateSwapChain(VDeviceQuery, VSurface, window);
 
-    
-    CreateSwapChain();
-    CreateImageViews();
+    VSwapChain.CreateImageViews(VDeviceQuery);
     CreateRenderPass();
     CreateGraphicsPipeline();
     CreateFrameBuffers();
@@ -73,7 +71,7 @@ void VulkanDevice::CleanUp()
     
     vkDestroyCommandPool(VDeviceQuery.GetChosenDevice(), commandPool, nullptr);
     
-    for (auto frameBuffer : swapChainFrameBuffers)
+    for (auto frameBuffer : VSwapChain.GetSwapChainFrameBuffer())
     {
         vkDestroyFramebuffer(VDeviceQuery.GetChosenDevice(), frameBuffer, nullptr);
     }
@@ -83,7 +81,7 @@ void VulkanDevice::CleanUp()
 
     vkDestroyRenderPass(VDeviceQuery.GetChosenDevice(), renderPass, nullptr);
 
-    for (auto imageView : swapChainImageViews)
+    for (auto imageView : VSwapChain.GetSwapChainImageViews())
     {
         vkDestroyImageView(VDeviceQuery.GetChosenDevice(), imageView, nullptr);
     }
@@ -328,7 +326,7 @@ VkShaderModule VulkanDevice::CreateShaderModule(const std::vector<char>& code)
 void VulkanDevice::CreateRenderPass()
 {
     VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = swapChainImageFormat;
+    colorAttachment.format = VSwapChain.GetSwapChainImageFormat();
     colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
     colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -377,22 +375,21 @@ void VulkanDevice::CreateRenderPass()
  */
 void VulkanDevice::CreateFrameBuffers()
 {
-    swapChainFrameBuffers.resize(swapChainImageViews.size());
-
-    for (size_t i = 0; i < swapChainFrameBuffers.size(); i++)
+    VSwapChain.swapChainFrameBuffers.resize(VSwapChain.GetSwapChainImageViews().size());
+    for (size_t i = 0; i < VSwapChain.swapChainFrameBuffers.size(); i++)
     {
-        VkImageView attachments[] = { swapChainImageViews[i] };
+        VkImageView attachments[] = { VSwapChain.GetSwapChainImageViews()[i] };
         
         VkFramebufferCreateInfo frameBufferInfo{};
         frameBufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         frameBufferInfo.renderPass = renderPass;
         frameBufferInfo.attachmentCount = 1;
         frameBufferInfo.pAttachments = attachments;
-        frameBufferInfo.width = swapChainExtent.width;
-        frameBufferInfo.height = swapChainExtent.height;
+        frameBufferInfo.width = VSwapChain.GetSwapChainImageExtent().width;
+        frameBufferInfo.height = VSwapChain.GetSwapChainImageExtent().height;
         frameBufferInfo.layers = 1;
 
-        if (vkCreateFramebuffer(VDeviceQuery.GetChosenDevice(), &frameBufferInfo, nullptr, &swapChainFrameBuffers[i]) != VK_SUCCESS)
+        if (vkCreateFramebuffer(VDeviceQuery.GetChosenDevice(), &frameBufferInfo, nullptr, &VSwapChain.swapChainFrameBuffers[i]) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create a Framebuffer!");
         }
@@ -451,9 +448,9 @@ void VulkanDevice::RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t i
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = renderPass;
-    renderPassInfo.framebuffer = swapChainFrameBuffers[imageIndex];
+    renderPassInfo.framebuffer = VSwapChain.swapChainFrameBuffers[imageIndex];
     renderPassInfo.renderArea.offset = {0, 0};
-    renderPassInfo.renderArea.extent = swapChainExtent;
+    renderPassInfo.renderArea.extent = VSwapChain.GetSwapChainImageExtent();
 
     VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
     renderPassInfo.clearValueCount = 1;
@@ -466,15 +463,15 @@ void VulkanDevice::RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t i
     VkViewport viewPort{};
     viewPort.x = 0.0f;
     viewPort.y = 0.0f;
-    viewPort.width = (float) swapChainExtent.width;
-    viewPort.height = (float) swapChainExtent.height;
+    viewPort.width = (float)VSwapChain.GetSwapChainImageExtent().width;
+    viewPort.height = (float)VSwapChain.GetSwapChainImageExtent().height;
     viewPort.minDepth = 0.0f;
     viewPort.maxDepth = 1.0f;
     vkCmdSetViewport(commandBuffer, 0, 1, &viewPort);
 
     VkRect2D scissor{};
     scissor.offset = {0, 0};
-    scissor.extent = swapChainExtent;
+    scissor.extent = VSwapChain.GetSwapChainImageExtent();
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
     
     vkCmdDraw(commandBuffer, 3, 1, 0, 0);
@@ -502,7 +499,7 @@ void VulkanDevice::DrawFrame()
     vkResetFences(VDeviceQuery.GetChosenDevice(), 1, &inFlightFence);
 
     uint32_t imageIndex;
-    vkAcquireNextImageKHR(VDeviceQuery.GetChosenDevice(), VSwapChain.GetSwapChain(), UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
+    vkAcquireNextImageKHR(VDeviceQuery.GetChosenDevice(), VSwapChain.swapChain, UINT64_MAX, imageAvailableSemaphore, VK_NULL_HANDLE, &imageIndex);
 
     vkResetCommandBuffer(commandBuffer, 0);
 

@@ -2,6 +2,8 @@
 
 #include "VulkanIncludes.h"
 
+#include <vector>
+
 class VulkanSurface
 {
 public:

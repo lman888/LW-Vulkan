@@ -27,8 +27,6 @@ private:
     void MainLoop();
     void CleanUp();
     VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
-    void CreateSwapChain();
-    void CreateImageViews();
     void CreateGraphicsPipeline();
     static std::vector<char> ReadFile(const std::string& fileName);
     VkShaderModule CreateShaderModule(const std::vector<char>& code);
@@ -45,9 +43,6 @@ private:
     const uint32_t WIDTH = 800;
     const uint32_t HEIGHT = 600;
     
-    std::vector<VkFramebuffer> swapChainFrameBuffers;
-    
-    std::vector<VkImageView> swapChainImageViews;
     VkRenderPass renderPass;
     VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;

@@ -20,22 +20,31 @@ public:
 	SwapChain();
 	~SwapChain();
 
-	void CreateSwapChain(DeviceQuery deviceQuery, VulkanSurface surface);
+	void CreateSwapChain(DeviceQuery deviceQuery, VulkanSurface surface, GLFWwindow* window);
 
 	VkSwapchainKHR GetSwapChain() const;
 
 	SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface);
 
+	void CreateImageViews(DeviceQuery deviceQuery);
+
+	//Clean this Later
+	std::vector<VkFramebuffer> GetSwapChainFrameBuffer();
+	std::vector<VkImageView> GetSwapChainImageViews();
+	std::vector<VkImage> GetSwapChainImages();
+	VkFormat GetSwapChainImageFormat();
+	VkExtent2D GetSwapChainImageExtent();
+	
+
+	std::vector<VkFramebuffer> swapChainFrameBuffers;
+	VkSwapchainKHR swapChain;
 private:
 
 	VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 
-	VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-
-	void CreateImageViews();
-
-	VkSwapchainKHR swapChain;
+	VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, GLFWwindow* window);
 	VkFormat swapChainImageFormat;
 	VkExtent2D swapChainExtent;
 	std::vector<VkImage> swapChainImages;
+	std::vector<VkImageView> swapChainImageViews;
 };
