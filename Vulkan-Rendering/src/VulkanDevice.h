@@ -4,13 +4,14 @@
 
 #include <vector>
 #include <optional>
-#include <fstream>
 
 //Project Files
 #include "DeviceQuery.h"
 #include "VulkanInstance.h"
 #include "VulkanSurface.h"
 #include "SwapChain.h"
+#include "RenderPass.h"
+#include "Pipelines.h"
 
 class VulkanDevice
 {
@@ -26,11 +27,7 @@ private:
     void InitVulkan();
     void MainLoop();
     void CleanUp();
-    VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
-    void CreateGraphicsPipeline();
-    static std::vector<char> ReadFile(const std::string& fileName);
-    VkShaderModule CreateShaderModule(const std::vector<char>& code);
-    void CreateRenderPass();
+    
     void CreateFrameBuffers();
     void CreateCommandPool();
     void CreateCommandBuffer();
@@ -43,9 +40,6 @@ private:
     const uint32_t WIDTH = 800;
     const uint32_t HEIGHT = 600;
     
-    VkRenderPass renderPass;
-    VkPipelineLayout pipelineLayout;
-    VkPipeline graphicsPipeline;
     VkCommandPool commandPool;
     VkCommandBuffer commandBuffer;
     VkSemaphore imageAvailableSemaphore;
@@ -56,4 +50,6 @@ private:
     VulkanInstance VInstance;
     VulkanSurface VSurface;
     SwapChain VSwapChain;
+    RenderPass VRenderPass;
+    Pipelines VPipeline;
 };

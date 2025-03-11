@@ -10,6 +10,12 @@
 
 SwapChain::SwapChain()
 {
+    swapChainImageFormat = VK_FORMAT_UNDEFINED;
+    swapChainExtent = {0, 0};
+    swapChainImages = {VK_NULL_HANDLE};
+    swapChainImageViews = {VK_NULL_HANDLE};
+    swapChain = VK_NULL_HANDLE;
+    swapChainFrameBuffers = {VK_NULL_HANDLE};
 }
 
 SwapChain::~SwapChain()
@@ -151,7 +157,7 @@ void SwapChain::CreateImageViews(DeviceQuery deviceQuery)
     }
 }
 
-std::vector<VkFramebuffer> SwapChain::GetSwapChainFrameBuffer()
+std::vector<VkFramebuffer>& SwapChain::GetSwapChainFrameBuffers()
 {
     return swapChainFrameBuffers;
 }

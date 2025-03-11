@@ -29,20 +29,20 @@ public:
 	void CreateImageViews(DeviceQuery deviceQuery);
 
 	//Clean this Later
-	std::vector<VkFramebuffer> GetSwapChainFrameBuffer();
+	std::vector<VkFramebuffer>& GetSwapChainFrameBuffers();
 	std::vector<VkImageView> GetSwapChainImageViews();
 	std::vector<VkImage> GetSwapChainImages();
 	VkFormat GetSwapChainImageFormat();
 	VkExtent2D GetSwapChainImageExtent();
 	
 
-	std::vector<VkFramebuffer> swapChainFrameBuffers;
-	VkSwapchainKHR swapChain;
 private:
 
 	VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 
 	VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, GLFWwindow* window);
+	VkSwapchainKHR swapChain;
+	std::vector<VkFramebuffer> swapChainFrameBuffers;
 	VkFormat swapChainImageFormat;
 	VkExtent2D swapChainExtent;
 	std::vector<VkImage> swapChainImages;
