@@ -45,7 +45,8 @@ void VulkanDevice::InitVulkan()
 
     VPipeline.CreateGraphicsPipeline(VDeviceQuery, VRenderPass);
     
-    CreateFrameBuffers();
+    VSwapChain.CreateFrameBuffers(VDeviceQuery, VRenderPass);
+
     CreateCommandPool();
     CreateCommandBuffer();
     CreateSyncObjects();
@@ -101,35 +102,6 @@ void VulkanDevice::CleanUp()
     glfwDestroyWindow(window);
 
     glfwTerminate();
-}
-
-/*
- * The Frame buffers represent a collection of specific memory attachments that a Render Pass instance uses.
- *
- * A Framebuffer object references all the VkImageView objects that represent the attachments. In this case that will be our color attachment. However, the image that we have to use for the attachment depends on which image
- * the swap chain returns when we retrieve one for presentation. That means that we have to create a framebuffer for all the images in the swap chain and use the one that corresponds to the retrieved image at drawing time.
- */
-void VulkanDevice::CreateFrameBuffers()
-{
-    VSwapChain.GetSwapChainFrameBuffers().resize(VSwapChain.GetSwapChainImageViews().size());
-    for (size_t i = 0; i < VSwapChain.GetSwapChainFrameBuffers().size(); i++)
-    {
-        VkImageView attachments[] = { VSwapChain.GetSwapChainImageViews()[i] };
-        
-        VkFramebufferCreateInfo frameBufferInfo{};
-        frameBufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        frameBufferInfo.renderPass = VRenderPass.GetRenderPass();
-        frameBufferInfo.attachmentCount = 1;
-        frameBufferInfo.pAttachments = attachments;
-        frameBufferInfo.width = VSwapChain.GetSwapChainImageExtent().width;
-        frameBufferInfo.height = VSwapChain.GetSwapChainImageExtent().height;
-        frameBufferInfo.layers = 1;
-
-        if (vkCreateFramebuffer(VDeviceQuery.GetChosenDevice(), &frameBufferInfo, nullptr, &VSwapChain.GetSwapChainFrameBuffers()[i]) != VK_SUCCESS)
-        {
-            throw std::runtime_error("Failed to create a Framebuffer!");
-        }
-    }
 }
 
 /*

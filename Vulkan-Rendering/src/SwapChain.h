@@ -6,6 +6,7 @@
 
 class VulkanSurface;
 class DeviceQuery;
+class RenderPass;
 
 struct SwapChainSupportDetails
 {
@@ -21,6 +22,8 @@ public:
 	~SwapChain();
 
 	void CreateSwapChain(DeviceQuery deviceQuery, VulkanSurface surface, GLFWwindow* window);
+
+	void CreateFrameBuffers(DeviceQuery deviceQuery, RenderPass renderPass);
 
 	VkSwapchainKHR GetSwapChain() const;
 

@@ -3,20 +3,24 @@
   "WorkspaceRootPath": "C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\VulkanDevice.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\VulkanDevice.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\VulkanDevice.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\VulkanDevice.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\SwapChain.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\SwapChain.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\SwapChain.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\SwapChain.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\VulkanDevice.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\VulkanDevice.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\SwapChain.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\SwapChain.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\DeviceQuery.h||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\DeviceQuery.h||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\DeviceQuery.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -29,10 +33,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\VulkanSurface.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\VulkanSurface.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\DeviceQuery.h||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\DeviceQuery.h||{8B382828-6202-11D1-8870-0000F87579D2}"
     }
   ],
   "DocumentGroupContainers": [
@@ -42,7 +42,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 11,
+          "SelectedChildIndex": 10,
           "Children": [
             {
               "$type": "Bookmark",
@@ -70,7 +70,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "VulkanSurface.h",
               "DocumentMoniker": "C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\VulkanSurface.h",
               "RelativeDocumentMoniker": "src\\VulkanSurface.h",
@@ -78,12 +78,11 @@
               "RelativeToolTip": "src\\VulkanSurface.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-03-02T21:46:06.15Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-03-02T21:46:06.15Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "VulkanSurface.cpp",
               "DocumentMoniker": "C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\VulkanSurface.cpp",
               "RelativeDocumentMoniker": "src\\VulkanSurface.cpp",
@@ -96,7 +95,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 4,
               "Title": "DeviceQuery.h",
               "DocumentMoniker": "C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\DeviceQuery.h",
               "RelativeDocumentMoniker": "src\\DeviceQuery.h",
@@ -109,7 +108,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "DeviceQuery.cpp",
               "DocumentMoniker": "C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\DeviceQuery.cpp",
               "RelativeDocumentMoniker": "src\\DeviceQuery.cpp",
@@ -122,54 +121,75 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
               "Title": "VulkanDevice.h",
               "DocumentMoniker": "C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\VulkanDevice.h",
               "RelativeDocumentMoniker": "src\\VulkanDevice.h",
               "ToolTip": "C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\VulkanDevice.h",
               "RelativeToolTip": "src\\VulkanDevice.h",
-              "ViewState": "AgIAAAwAAAAAAAAAAAAAAAsAAAAaAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2025-02-26T21:36:44.286Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "VulkanDevice.cpp",
-              "DocumentMoniker": "C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\VulkanDevice.cpp",
-              "RelativeDocumentMoniker": "src\\VulkanDevice.cpp",
-              "ToolTip": "C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\VulkanDevice.cpp",
-              "RelativeToolTip": "src\\VulkanDevice.cpp",
-              "ViewState": "AgIAAGMBAAAAAAAAAAAkwIYBAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-02-26T21:36:43.718Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "SwapChain.h",
               "DocumentMoniker": "C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\SwapChain.h",
               "RelativeDocumentMoniker": "src\\SwapChain.h",
               "ToolTip": "C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\SwapChain.h",
               "RelativeToolTip": "src\\SwapChain.h",
-              "ViewState": "AgIAABUAAAAAAAAAAAAAACgAAAAIAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2025-02-26T21:36:39.782Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "SwapChain.cpp",
               "DocumentMoniker": "C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\SwapChain.cpp",
               "RelativeDocumentMoniker": "src\\SwapChain.cpp",
               "ToolTip": "C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\SwapChain.cpp",
               "RelativeToolTip": "src\\SwapChain.cpp",
-              "ViewState": "AgIAAIQAAAAAAAAAAAAIwJwAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAFQAAAAAAAAAAAAAAGcAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-03-02T21:40:05.342Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "FloatingWindowState": {
+        "Id": "3e1d439c-6beb-4c03-b673-19649037444e",
+        "Display": 1,
+        "X": 1220,
+        "Y": 297,
+        "Width": 2149,
+        "Height": 966,
+        "WindowState": 2
+      },
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "VulkanDevice.cpp",
+              "DocumentMoniker": "C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\VulkanDevice.cpp",
+              "RelativeDocumentMoniker": "src\\VulkanDevice.cpp",
+              "ToolTip": "C:\\Users\\Administrator\\Documents\\Repos\\LW-Vulkan\\Vulkan-Rendering\\src\\VulkanDevice.cpp",
+              "RelativeToolTip": "src\\VulkanDevice.cpp",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAmwDcAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-02-26T21:36:43.718Z",
               "EditorCaption": ""
             }
           ]

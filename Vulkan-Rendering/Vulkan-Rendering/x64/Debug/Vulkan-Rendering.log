@@ -1,2 +1,8 @@
-﻿  VulkanDevice.cpp
+﻿  DeviceQuery.cpp
+  RenderPass.cpp
+  SwapChain.cpp
+  Vulkan-Rendering.cpp
+  Generating Code...
+  VulkanDevice.cpp
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   Vulkan-Rendering.vcxproj -> C:\Users\Administrator\Documents\Repos\LW-Vulkan\Vulkan-Rendering\x64\Debug\Vulkan-Rendering.exe

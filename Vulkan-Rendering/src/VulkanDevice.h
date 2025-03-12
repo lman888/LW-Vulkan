@@ -28,7 +28,6 @@ private:
     void MainLoop();
     void CleanUp();
     
-    void CreateFrameBuffers();
     void CreateCommandPool();
     void CreateCommandBuffer();
     void RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
