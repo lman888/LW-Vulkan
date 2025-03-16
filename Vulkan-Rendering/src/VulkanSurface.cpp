@@ -12,7 +12,7 @@ VulkanSurface::~VulkanSurface()
 {
 }
 
-VkSurfaceKHR VulkanSurface::GetVulkanSurface()
+VkSurfaceKHR& VulkanSurface::GetVulkanSurface()
 {
     return surface;
 }
@@ -25,7 +25,7 @@ VkSurfaceKHR VulkanSurface::GetVulkanSurface()
  *
  * The Window Surface needs to be created right after the instance creation, because it can actually influence the physical device selection. 
  */
-void VulkanSurface::CreateSurface(VkInstance instance, GLFWwindow* window)
+void VulkanSurface::CreateSurface(VkInstance& instance, GLFWwindow* window)
 {
     if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
     {

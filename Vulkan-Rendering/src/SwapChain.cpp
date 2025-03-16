@@ -7,8 +7,6 @@
 #include "VulkanSurface.h"
 #include "RenderPass.h"
 
-//Fix Swap Chain Class
-
 SwapChain::SwapChain()
 {
     swapChainImageFormat = VK_FORMAT_UNDEFINED;
@@ -32,7 +30,7 @@ SwapChain::~SwapChain()
  * How exactly the queue works and the conditions for presenting an image from the queue depend on how the swap chain is set up, but the general purpose of the swap chain is to synchronize the presentation of images with the refresh
  * rate of the screen.
  */
-void SwapChain::CreateSwapChain(DeviceQuery deviceQuery, VulkanSurface surface, GLFWwindow* window)
+void SwapChain::CreateSwapChain(DeviceQuery& deviceQuery, VulkanSurface& surface, GLFWwindow* window)
 {
     SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport(deviceQuery.GetPhysicalDevice(), surface.GetVulkanSurface());
 
@@ -47,7 +45,7 @@ void SwapChain::CreateSwapChain(DeviceQuery deviceQuery, VulkanSurface surface, 
     {
         imageCount = swapChainSupport.capabilities.maxImageCount;
     }
-
+    
     VkSwapchainCreateInfoKHR createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
     createInfo.surface = surface.GetVulkanSurface();
@@ -78,7 +76,6 @@ void SwapChain::CreateSwapChain(DeviceQuery deviceQuery, VulkanSurface surface, 
     createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     createInfo.presentMode = presentMode;
     createInfo.clipped = VK_TRUE;
-    createInfo.oldSwapchain = VK_NULL_HANDLE;
 
     if (vkCreateSwapchainKHR(deviceQuery.GetChosenDevice(), &createInfo, nullptr, &swapChain) != VK_SUCCESS)
     {
@@ -99,7 +96,7 @@ void SwapChain::CreateSwapChain(DeviceQuery deviceQuery, VulkanSurface surface, 
  * A Framebuffer object references all the VkImageView objects that represent the attachments. In this case that will be our color attachment. However, the image that we have to use for the attachment depends on which image
  * the swap chain returns when we retrieve one for presentation. That means that we have to create a framebuffer for all the images in the swap chain and use the one that corresponds to the retrieved image at drawing time.
  */
-void SwapChain::CreateFrameBuffers(DeviceQuery deviceQuery, RenderPass renderPass)
+void SwapChain::CreateFrameBuffers(DeviceQuery& deviceQuery, RenderPass& renderPass)
 {
     swapChainFrameBuffers.resize(swapChainImageViews.size());
     for (size_t i = 0; i < swapChainFrameBuffers.size(); i++)
@@ -122,12 +119,12 @@ void SwapChain::CreateFrameBuffers(DeviceQuery deviceQuery, RenderPass renderPas
     }
 }
 
-VkSwapchainKHR SwapChain::GetSwapChain() const
+VkSwapchainKHR SwapChain::GetSwapChain()
 {
 	return swapChain;
 }
 
-SwapChainSupportDetails SwapChain::QuerySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface)
+SwapChainSupportDetails SwapChain::QuerySwapChainSupport(VkPhysicalDevice& device, VkSurfaceKHR& surface)
 {
     SwapChainSupportDetails details;
 
@@ -157,7 +154,7 @@ SwapChainSupportDetails SwapChain::QuerySwapChainSupport(VkPhysicalDevice device
 /*
  * An Image View is quite literally a view into an image. It describes how to access the image and which part of the image to access, for example if it should be treated as a 2D texture depth texture without any mipmapping levels.
  */
-void SwapChain::CreateImageViews(DeviceQuery deviceQuery)
+void SwapChain::CreateImageViews(DeviceQuery& deviceQuery)
 {
     swapChainImageViews.resize(swapChainImages.size());
 
@@ -187,29 +184,71 @@ void SwapChain::CreateImageViews(DeviceQuery deviceQuery)
     }
 }
 
+void SwapChain::ReCreateSwapChain(DeviceQuery& device, VulkanSurface& surface, RenderPass& renderPass, GLFWwindow* window)
+{
+    int width = 0;
+    int height = 0;
+    glfwGetFramebufferSize(window, &width, &height);
+    
+    while (width == 0 || height == 0)
+    {
+        glfwGetFramebufferSize(window, &width, &height);
+        glfwWaitEvents();
+    }
+    
+    vkDeviceWaitIdle(device.GetChosenDevice());
+
+    CleanUpSwapChain(device);
+    
+    CreateSwapChain(device, surface, window);
+    CreateImageViews(device);
+    CreateFrameBuffers(device, renderPass);
+}
+
 std::vector<VkFramebuffer>& SwapChain::GetSwapChainFrameBuffers()
 {
     return swapChainFrameBuffers;
 }
 
-std::vector<VkImageView> SwapChain::GetSwapChainImageViews()
+std::vector<VkImageView>& SwapChain::GetSwapChainImageViews()
 {
     return swapChainImageViews;
 }
 
-std::vector<VkImage> SwapChain::GetSwapChainImages()
+std::vector<VkImage>& SwapChain::GetSwapChainImages()
 {
     return swapChainImages;
 }
 
-VkFormat SwapChain::GetSwapChainImageFormat()
+VkFormat& SwapChain::GetSwapChainImageFormat()
 {
     return swapChainImageFormat;
 }
 
-VkExtent2D SwapChain::GetSwapChainImageExtent()
+VkExtent2D& SwapChain::GetSwapChainImageExtent()
 {
     return swapChainExtent;
+}
+
+void SwapChain::CleanUpSwapChain(DeviceQuery device)
+{
+    for (VkFramebuffer& swapChainFrameBuffer : swapChainFrameBuffers)
+    {
+        vkDestroyFramebuffer(device.GetChosenDevice(), swapChainFrameBuffer, nullptr);
+    }
+    swapChainFrameBuffers.clear();
+
+    for (VkImageView& swapChainImageView : swapChainImageViews)
+    {
+        vkDestroyImageView(device.GetChosenDevice(), swapChainImageView, nullptr);
+    }
+    swapChainImageViews.clear();
+
+    if (swapChain != VK_NULL_HANDLE)
+    {
+        vkDestroySwapchainKHR(device.GetChosenDevice(), swapChain, nullptr);
+        swapChain = VK_NULL_HANDLE;
+    }
 }
 
 VkPresentModeKHR SwapChain::ChooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
@@ -230,16 +269,14 @@ VkExtent2D SwapChain::ChooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilit
     {
         return capabilities.currentExtent;
     }
-    else
-    {
-        int width, height;
-        glfwGetFramebufferSize(window, &width, &height);
 
-        VkExtent2D actualExtent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
 
-        actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
-        actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+    VkExtent2D actualExtent = { static_cast<uint32_t>(width), static_cast<uint32_t>(height) };
 
-        return actualExtent;
-    }
+    actualExtent.width = std::clamp(actualExtent.width, capabilities.minImageExtent.width, capabilities.maxImageExtent.width);
+    actualExtent.height = std::clamp(actualExtent.height, capabilities.minImageExtent.height, capabilities.maxImageExtent.height);
+
+    return actualExtent;
 }

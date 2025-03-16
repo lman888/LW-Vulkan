@@ -32,7 +32,7 @@ public:
     void CreateLogicalDevice(VkSurfaceKHR surface, bool enableValidationLayers, std::vector<const char*> validationLayers);
     
     VkDevice GetChosenDevice() const;
-    VkPhysicalDevice GetPhysicalDevice() const;
+    VkPhysicalDevice& GetPhysicalDevice();
     VkQueue GetGraphicsQueue() const;
     VkQueue GetPresentQueue() const;
 

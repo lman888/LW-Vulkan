@@ -179,6 +179,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\CommandBuffer.cpp" />
     <ClCompile Include="src\DeviceQuery.cpp" />
     <ClCompile Include="src\Pipelines.cpp" />
     <ClCompile Include="src\RenderPass.cpp" />
@@ -264,6 +265,7 @@
     <ClCompile Include="src\SwapChain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\CommandBuffer.h" />
     <ClInclude Include="src\DeviceQuery.h" />
     <ClInclude Include="src\Pipelines.h" />
     <ClInclude Include="src\RenderPass.h" />

@@ -104,7 +104,7 @@ void DeviceQuery::CreateLogicalDevice(VkSurfaceKHR surface, bool enableValidatio
     vkGetDeviceQueue(chosenDevice, indices.presentFamily.value(), 0, &presentQueue);
 }
 
-VkPhysicalDevice DeviceQuery::GetPhysicalDevice() const
+VkPhysicalDevice& DeviceQuery::GetPhysicalDevice()
 {
     return physicalDevice;
 }

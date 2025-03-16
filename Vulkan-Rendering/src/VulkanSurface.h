@@ -10,9 +10,9 @@ public:
     VulkanSurface();
     ~VulkanSurface();
     
-    void CreateSurface(VkInstance instance, GLFWwindow* window);
+    void CreateSurface(VkInstance& instance, GLFWwindow* window);
 
-    VkSurfaceKHR GetVulkanSurface();
+    VkSurfaceKHR& GetVulkanSurface();
 
     VkSurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
     

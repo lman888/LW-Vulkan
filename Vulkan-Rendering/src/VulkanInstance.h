@@ -37,7 +37,7 @@ public:
 
     void CreateVulkanInstance();
 
-    VkInstance GetVulkanInstance();
+    VkInstance& GetVulkanInstance();
     bool GetEnableValidation() const;
     std::vector<const char*> GetValidationLayers() const;
     void SetupDebugMessenger();
