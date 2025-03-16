@@ -45,6 +45,8 @@ void SwapChain::CreateSwapChain(DeviceQuery& deviceQuery, VulkanSurface& surface
     {
         imageCount = swapChainSupport.capabilities.maxImageCount;
     }
+
+    VkSwapchainKHR oldSwapChain = swapChain;
     
     VkSwapchainCreateInfoKHR createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -76,6 +78,7 @@ void SwapChain::CreateSwapChain(DeviceQuery& deviceQuery, VulkanSurface& surface
     createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     createInfo.presentMode = presentMode;
     createInfo.clipped = VK_TRUE;
+    createInfo.oldSwapchain = oldSwapChain;
 
     if (vkCreateSwapchainKHR(deviceQuery.GetChosenDevice(), &createInfo, nullptr, &swapChain) != VK_SUCCESS)
     {
@@ -88,6 +91,12 @@ void SwapChain::CreateSwapChain(DeviceQuery& deviceQuery, VulkanSurface& surface
 
     swapChainImageFormat = surfaceFormat.format;
     swapChainExtent = extent;
+
+    if (oldSwapChain != VK_NULL_HANDLE)
+    {
+        vkDeviceWaitIdle(deviceQuery.GetChosenDevice());
+        vkDestroySwapchainKHR(deviceQuery.GetChosenDevice(), oldSwapChain, nullptr);
+    }
 }
 
 /*
