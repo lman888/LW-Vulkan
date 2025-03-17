@@ -43,14 +43,11 @@ void VulkanDevice::InitVulkan()
     VDeviceQuery.CreateLogicalDevice(VSurface.GetVulkanSurface(), VInstance.GetEnableValidation(), VInstance.GetValidationLayers());
     VSwapChain.CreateSwapChain(VDeviceQuery, VSurface, window);
     VSwapChain.CreateImageViews(VDeviceQuery);
-    
     VRenderPass.CreateRenderPass(VDeviceQuery, VSwapChain);
-
     VPipeline.CreateGraphicsPipeline(VDeviceQuery, VRenderPass);
-    
     VSwapChain.CreateFrameBuffers(VDeviceQuery, VRenderPass);
-
     VCommandBuffer.CreateCommandPool(VDeviceQuery, VSurface);
+    VPipeline.CreateVertexBuffer(VDeviceQuery);
     VCommandBuffer.CreateCommandBuffers(VDeviceQuery);
     VCommandBuffer.CreateSyncObjects(VDeviceQuery);
 }
@@ -71,9 +68,8 @@ void VulkanDevice::CleanUp()
     VCommandBuffer.CleanUp(VDeviceQuery);
 
     VSwapChain.CleanUpSwapChain(VDeviceQuery);
-    
-    vkDestroyPipeline(VDeviceQuery.GetChosenDevice(), VPipeline.GetGraphicsPipeline(), nullptr);
-    vkDestroyPipelineLayout(VDeviceQuery.GetChosenDevice(), VPipeline.GetPipelineLayout(), nullptr);
+
+    VPipeline.CleanUp(VDeviceQuery);
 
     vkDestroyRenderPass(VDeviceQuery.GetChosenDevice(), VRenderPass.GetRenderPass(), nullptr);
     

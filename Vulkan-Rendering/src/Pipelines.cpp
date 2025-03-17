@@ -50,7 +50,7 @@ Pipelines::~Pipelines()
  *
  * In Vulkan we must create the entire graphics pipeline from scratch. The disadvantage of this is how many pipelines we may have to make (A lot of work), the benefits is we have essentially complete control.
  */
-void Pipelines::CreateGraphicsPipeline(DeviceQuery deviceQuery, RenderPass renderPass)
+void Pipelines::CreateGraphicsPipeline(DeviceQuery& deviceQuery, RenderPass& renderPass)
 {
     auto vertShaderCode = ReadFile("shaders/vert.spv");
     auto fragShaderCode = ReadFile("shaders/frag.spv");
@@ -82,13 +82,16 @@ void Pipelines::CreateGraphicsPipeline(DeviceQuery deviceQuery, RenderPass rende
     dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
     dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
     dynamicState.pDynamicStates = dynamicStates.data();
-
+    
+    VkVertexInputBindingDescription bindingDescription = Vertex::GetBindingDescription();
+    std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions = Vertex::GetAttributeDescriptions();
+    
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInputInfo.vertexBindingDescriptionCount = 0;
-    vertexInputInfo.pVertexBindingDescriptions = nullptr; //Optional
-    vertexInputInfo.vertexAttributeDescriptionCount = 0;
-    vertexInputInfo.pVertexAttributeDescriptions = nullptr; //Optional
+    vertexInputInfo.vertexBindingDescriptionCount = 1;
+    vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+    vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+    vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
     VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
     inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -182,6 +185,40 @@ void Pipelines::CreateGraphicsPipeline(DeviceQuery deviceQuery, RenderPass rende
     vkDestroyShaderModule(deviceQuery.GetChosenDevice(), vertShaderModule, nullptr);
 }
 
+void Pipelines::CreateVertexBuffer(DeviceQuery& device)
+{
+    VkBufferCreateInfo bufferInfo{};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = sizeof(vertices[0]) * vertices.size();
+    bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    if (vkCreateBuffer(device.GetChosenDevice(), &bufferInfo, nullptr, &vertexBuffer) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to Create Vertex Buffer");
+    }
+
+    VkMemoryRequirements memRequirements;
+    vkGetBufferMemoryRequirements(device.GetChosenDevice(), vertexBuffer, &memRequirements);
+
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, device);
+
+    if (vkAllocateMemory(device.GetChosenDevice(), &allocInfo, nullptr, &vertexBufferMemory) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to allocated Vertex Buffer Memory!");
+    }
+
+    vkBindBufferMemory(device.GetChosenDevice(), vertexBuffer, vertexBufferMemory, 0);
+
+    void* data;
+    vkMapMemory(device.GetChosenDevice(), vertexBufferMemory, 0, bufferInfo.size, 0, &data);
+    memcpy(data, vertices.data(), (size_t)bufferInfo.size);
+    vkUnmapMemory(device.GetChosenDevice(), vertexBufferMemory);
+}
+
 VkPipelineLayout& Pipelines::GetPipelineLayout()
 {
     return pipelineLayout;
@@ -190,6 +227,21 @@ VkPipelineLayout& Pipelines::GetPipelineLayout()
 VkPipeline& Pipelines::GetGraphicsPipeline()
 {
     return graphicsPipeline;
+}
+
+VkBuffer& Pipelines::GetVertexBuffer()
+{
+    return vertexBuffer;
+}
+
+void Pipelines::CleanUp(DeviceQuery& device)
+{
+    vkDestroyBuffer(device.GetChosenDevice(), vertexBuffer, nullptr);
+
+    vkFreeMemory(device.GetChosenDevice(), vertexBufferMemory, nullptr);
+
+    vkDestroyPipeline(device.GetChosenDevice(), graphicsPipeline, nullptr);
+    vkDestroyPipelineLayout(device.GetChosenDevice(), pipelineLayout, nullptr);
 }
 
 std::vector<char> Pipelines::ReadFile(const std::string& fileName)
@@ -212,7 +264,7 @@ std::vector<char> Pipelines::ReadFile(const std::string& fileName)
     return buffer;
 }
 
-VkShaderModule Pipelines::CreateShaderModule(const std::vector<char>& code, DeviceQuery deviceQury)
+VkShaderModule Pipelines::CreateShaderModule(const std::vector<char>& code, DeviceQuery& deviceQury)
 {
     VkShaderModuleCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -226,4 +278,21 @@ VkShaderModule Pipelines::CreateShaderModule(const std::vector<char>& code, Devi
     }
 
     return shaderModule;
+}
+
+uint32_t Pipelines::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties, DeviceQuery& device)
+{
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vkGetPhysicalDeviceMemoryProperties(device.GetPhysicalDevice(), &memProperties);
+
+    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
+    {
+        if (typeFilter & (1 << i) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+        {
+            return i;
+        }
+    }
+    throw std::runtime_error("Failed to find a suitable Memory Type!");
+    
+    return 0;
 }

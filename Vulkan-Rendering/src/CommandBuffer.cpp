@@ -84,6 +84,10 @@ void CommandBuffer::RecordCommandBuffer(uint32_t imageIndex, RenderPass& renderP
 
     vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.GetGraphicsPipeline());
 
+    VkBuffer vertexBuffers[] = { pipeline.GetVertexBuffer() };
+    VkDeviceSize offsets[] = {0};
+    vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
+    
     VkViewport viewPort{};
     viewPort.x = 0.0f;
     viewPort.y = 0.0f;
@@ -98,7 +102,7 @@ void CommandBuffer::RecordCommandBuffer(uint32_t imageIndex, RenderPass& renderP
     scissor.extent = swapChain.GetSwapChainImageExtent();
     vkCmdSetScissor(commandBuffers[currentFrame], 0, 1, &scissor);
     
-    vkCmdDraw(commandBuffers[currentFrame], 3, 1, 0, 0);
+    vkCmdDraw(commandBuffers[currentFrame], static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 
     vkCmdEndRenderPass(commandBuffers[currentFrame]);
 
