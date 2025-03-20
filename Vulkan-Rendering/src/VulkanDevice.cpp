@@ -47,7 +47,8 @@ void VulkanDevice::InitVulkan()
     VPipeline.CreateGraphicsPipeline(VDeviceQuery, VRenderPass);
     VSwapChain.CreateFrameBuffers(VDeviceQuery, VRenderPass);
     VCommandBuffer.CreateCommandPool(VDeviceQuery, VSurface);
-    VPipeline.CreateVertexBuffer(VDeviceQuery);
+    VPipeline.CreateVertexBuffer(VDeviceQuery, VCommandBuffer);
+    VPipeline.CreateIndexBuffer(VDeviceQuery, VCommandBuffer);
     VCommandBuffer.CreateCommandBuffers(VDeviceQuery);
     VCommandBuffer.CreateSyncObjects(VDeviceQuery);
 }

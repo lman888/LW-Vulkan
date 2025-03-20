@@ -109,17 +109,17 @@ VkPhysicalDevice& DeviceQuery::GetPhysicalDevice()
     return physicalDevice;
 }
 
-VkQueue DeviceQuery::GetGraphicsQueue() const
+VkQueue& DeviceQuery::GetGraphicsQueue()
 {
     return graphicsQueue;
 }
 
-VkQueue DeviceQuery::GetPresentQueue() const
+VkQueue& DeviceQuery::GetPresentQueue()
 {
     return presentQueue;
 }
 
-VkDevice DeviceQuery::GetChosenDevice() const
+VkDevice& DeviceQuery::GetChosenDevice()
 {
     return chosenDevice;
 }

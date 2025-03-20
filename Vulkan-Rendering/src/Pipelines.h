@@ -7,6 +7,7 @@
 
 class DeviceQuery;
 class RenderPass;
+class CommandBuffer;
 
 //Replace into class later
 #include <glm/glm.hpp>
@@ -46,9 +47,15 @@ struct Vertex
 
 const std::vector<Vertex> vertices =
 {
-    {{0.0f, -0.5f},{1.0f, 1.0f, 1.0f}},
-    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{-0.5f ,0.5f}, {0.0f, 0.0f, 1.0f}}
+    {{-0.5f, -0.5f},{1.0f, 0.0f, 0.0f}},
+    {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{0.5f ,0.5f}, {0.0f, 0.0f, 1.0f}},
+    {{-0.5f ,0.5f}, {1.0f, 1.0f, 1.0f}}
+};
+
+const std::vector<uint16_t> indices =
+{
+    0, 1, 2, 2, 3, 0
 };
 
 class Pipelines
@@ -59,22 +66,31 @@ public:
 
     void CreateGraphicsPipeline(DeviceQuery& deviceQuery, RenderPass& renderPass);
 
-    void CreateVertexBuffer(DeviceQuery& device);
+    void CreateVertexBuffer(DeviceQuery& device, CommandBuffer& commandBuffer);
+    void CreateIndexBuffer(DeviceQuery& device, CommandBuffer& commandBuffer);
 
     VkPipelineLayout& GetPipelineLayout();
     VkPipeline& GetGraphicsPipeline();
     VkBuffer& GetVertexBuffer();
+    VkBuffer& GetIndexBuffer();
 
-    void CleanUp(DeviceQuery& device);
-    
+    void CleanUp(DeviceQuery& device) const;
+
 private:
 
+    static uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties, DeviceQuery& device);
+
+    void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory, DeviceQuery& device);
+
+    void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size, CommandBuffer& commandBuf, DeviceQuery& device);
+    
     static std::vector<char> ReadFile(const std::string& fileName);
     VkShaderModule CreateShaderModule(const std::vector<char>& code, DeviceQuery& deviceQury);
-    uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties, DeviceQuery& device);
     
     VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
+    VkBuffer indexBuffer;
+    VkDeviceMemory indexBufferMemory;
 };

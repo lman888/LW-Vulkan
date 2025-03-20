@@ -31,10 +31,10 @@ public:
     void PickPhysicalDevice(VkInstance instance, VkSurfaceKHR surface, SwapChain swapChain);
     void CreateLogicalDevice(VkSurfaceKHR surface, bool enableValidationLayers, std::vector<const char*> validationLayers);
     
-    VkDevice GetChosenDevice() const;
+    VkDevice& GetChosenDevice();
     VkPhysicalDevice& GetPhysicalDevice();
-    VkQueue GetGraphicsQueue() const;
-    VkQueue GetPresentQueue() const;
+    VkQueue& GetGraphicsQueue();
+    VkQueue& GetPresentQueue();
 
     QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface);
 
