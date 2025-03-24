@@ -4,9 +4,7 @@
 
 #include <vector>
 
-class VulkanSurface;
-class DeviceQuery;
-class RenderPass;
+class VulkanCore;
 
 struct SwapChainSupportDetails
 {
@@ -21,17 +19,17 @@ public:
 	SwapChain();
 	~SwapChain();
 
-	void CreateSwapChain(DeviceQuery& deviceQuery, VulkanSurface& surface, GLFWwindow* window);
+	void CreateSwapChain(GLFWwindow* window, VulkanCore* vulkanCore);
 
-	void CreateFrameBuffers(DeviceQuery& deviceQuery, RenderPass& renderPass);
+	void CreateFrameBuffers(VulkanCore* vulkanCore);
 
 	VkSwapchainKHR GetSwapChain();
 
-	SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice& device, VkSurfaceKHR& surface);
+	SwapChainSupportDetails QuerySwapChainSupport(VulkanCore* vulkanCore);
 
-	void CreateImageViews(DeviceQuery& deviceQuery);
+	void CreateImageViews(VulkanCore* vulkanCore);
 
-	void ReCreateSwapChain(DeviceQuery& device, VulkanSurface& surface, RenderPass& renderPass, GLFWwindow* window);
+	void ReCreateSwapChain(GLFWwindow* window, VulkanCore* vulkanCore);
 	
 	//Clean this Later
 	std::vector<VkFramebuffer>& GetSwapChainFrameBuffers();
@@ -40,7 +38,7 @@ public:
 	VkFormat& GetSwapChainImageFormat();
 	VkExtent2D& GetSwapChainImageExtent();
 	
-	void CleanUpSwapChain(DeviceQuery device);
+	void CleanUpSwapChain(VulkanCore* vulkanCore);
 
 private:
 	

@@ -5,6 +5,8 @@
 #include <optional>
 #include <vector>
 
+class VulkanSurface;
+class VulkanCore;
 class SwapChain;
 
 struct QueueFamilyIndices
@@ -28,15 +30,15 @@ public:
     DeviceQuery();
     ~DeviceQuery();
 
-    void PickPhysicalDevice(VkInstance instance, VkSurfaceKHR surface, SwapChain swapChain);
-    void CreateLogicalDevice(VkSurfaceKHR surface, bool enableValidationLayers, std::vector<const char*> validationLayers);
+    void PickPhysicalDevice(VulkanCore* vulkanCore);
+    void CreateLogicalDevice(VulkanCore* vulkanCore);
     
-    VkDevice& GetChosenDevice();
+    VkDevice& GetChosenGPUDevice();
     VkPhysicalDevice& GetPhysicalDevice();
     VkQueue& GetGraphicsQueue();
     VkQueue& GetPresentQueue();
 
-    QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface);
+    QueueFamilyIndices FindQueueFamilies(VulkanCore* vulkanCore);
 
 private:
 
@@ -46,6 +48,6 @@ private:
     VkPhysicalDevice physicalDevice;
     const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
-    bool IsDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface, SwapChain swapChain);
+    bool IsDeviceSuitable(VkPhysicalDevice device, VulkanCore* vulkanCore);
     bool CheckDeviceExtensionSupport(VkPhysicalDevice device) const;
 };

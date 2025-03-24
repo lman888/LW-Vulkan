@@ -5,6 +5,7 @@
 #include "CommandBuffer.h"
 #include "DeviceQuery.h"
 #include "RenderPass.h"
+#include "VulkanCore.h"
 
 Pipelines::Pipelines()
 {
@@ -51,13 +52,13 @@ Pipelines::~Pipelines()
  *
  * In Vulkan we must create the entire graphics pipeline from scratch. The disadvantage of this is how many pipelines we may have to make (A lot of work), the benefits is we have essentially complete control.
  */
-void Pipelines::CreateGraphicsPipeline(DeviceQuery& deviceQuery, RenderPass& renderPass)
+void Pipelines::CreateGraphicsPipeline(VulkanCore* vulkanCore)
 {
     auto vertShaderCode = ReadFile("shaders/vert.spv");
     auto fragShaderCode = ReadFile("shaders/frag.spv");
 
-    VkShaderModule vertShaderModule = CreateShaderModule(vertShaderCode, deviceQuery);
-    VkShaderModule fragShaderModule = CreateShaderModule(fragShaderCode, deviceQuery);
+    VkShaderModule vertShaderModule = CreateShaderModule(vertShaderCode, *vulkanCore->GetChosenDevice());
+    VkShaderModule fragShaderModule = CreateShaderModule(fragShaderCode, *vulkanCore->GetChosenDevice());
 
     VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
     vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -154,7 +155,7 @@ void Pipelines::CreateGraphicsPipeline(DeviceQuery& deviceQuery, RenderPass& ren
     pipelineLayoutInfo.pushConstantRangeCount = 0;
     pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
-    if (vkCreatePipelineLayout(deviceQuery.GetChosenDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
+    if (vkCreatePipelineLayout(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create Pipeline Layout!");
     }
@@ -172,60 +173,60 @@ void Pipelines::CreateGraphicsPipeline(DeviceQuery& deviceQuery, RenderPass& ren
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.pDynamicState = &dynamicState;
     pipelineInfo.layout = pipelineLayout;
-    pipelineInfo.renderPass = renderPass.GetRenderPass();
+    pipelineInfo.renderPass = vulkanCore->GetRenderPass()->GetRenderPass();
     pipelineInfo.subpass = 0;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; //Optional
     pipelineInfo.basePipelineIndex = -1; //Optional
 
-    if (vkCreateGraphicsPipelines(deviceQuery.GetChosenDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS)
+    if (vkCreateGraphicsPipelines(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create a Graphics Pipeline!");
     }
     
-    vkDestroyShaderModule(deviceQuery.GetChosenDevice(), fragShaderModule, nullptr);
-    vkDestroyShaderModule(deviceQuery.GetChosenDevice(), vertShaderModule, nullptr);
+    vkDestroyShaderModule(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), fragShaderModule, nullptr);
+    vkDestroyShaderModule(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), vertShaderModule, nullptr);
 }
 
-void Pipelines::CreateVertexBuffer(DeviceQuery& device, CommandBuffer& commandBuffer)
+void Pipelines::CreateVertexBuffer(VulkanCore* vulkanCore)
 {
     VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
-    CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory, device);
+    CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory, *vulkanCore->GetChosenDevice());
     
     void* data;
-    vkMapMemory(device.GetChosenDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
+    vkMapMemory(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
     memcpy(data, vertices.data(), (size_t)bufferSize);
-    vkUnmapMemory(device.GetChosenDevice(), stagingBufferMemory);
+    vkUnmapMemory(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), stagingBufferMemory);
     
-    CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory, device);
+    CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory, *vulkanCore->GetChosenDevice());
 
-    CopyBuffer(stagingBuffer, vertexBuffer, bufferSize, commandBuffer, device);
+    CopyBuffer(stagingBuffer, vertexBuffer, bufferSize, *vulkanCore->GetCommandBuffer(), *vulkanCore->GetChosenDevice());
 
-    vkDestroyBuffer(device.GetChosenDevice(), stagingBuffer, nullptr);
-    vkFreeMemory(device.GetChosenDevice(), stagingBufferMemory, nullptr);
+    vkDestroyBuffer(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), stagingBuffer, nullptr);
+    vkFreeMemory(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), stagingBufferMemory, nullptr);
 }
 
-void Pipelines::CreateIndexBuffer(DeviceQuery& device, CommandBuffer& commandBuffer)
+void Pipelines::CreateIndexBuffer(VulkanCore* vulkanCore)
 {
     VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
-    CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory, device);
+    CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory, *vulkanCore->GetChosenDevice());
 
     void* data;
-    vkMapMemory(device.GetChosenDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
+    vkMapMemory(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
     memcpy(data, indices.data(), (size_t)bufferSize);
-    vkUnmapMemory(device.GetChosenDevice(), stagingBufferMemory);
+    vkUnmapMemory(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), stagingBufferMemory);
 
-    CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory, device);
+    CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory, *vulkanCore->GetChosenDevice());
 
-    CopyBuffer(stagingBuffer, indexBuffer, bufferSize, commandBuffer, device);
+    CopyBuffer(stagingBuffer, indexBuffer, bufferSize, *vulkanCore->GetCommandBuffer(), *vulkanCore->GetChosenDevice());
 
-    vkDestroyBuffer(device.GetChosenDevice(), stagingBuffer, nullptr);
-    vkFreeMemory(device.GetChosenDevice(), stagingBufferMemory, nullptr);
+    vkDestroyBuffer(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), stagingBuffer, nullptr);
+    vkFreeMemory(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), stagingBufferMemory, nullptr);
     
 }
 
@@ -251,14 +252,14 @@ VkBuffer& Pipelines::GetIndexBuffer()
 
 void Pipelines::CleanUp(DeviceQuery& device) const
 {
-    vkDestroyBuffer(device.GetChosenDevice(), vertexBuffer, nullptr);
-    vkFreeMemory(device.GetChosenDevice(), vertexBufferMemory, nullptr);
+    vkDestroyBuffer(device.GetChosenGPUDevice(), vertexBuffer, nullptr);
+    vkFreeMemory(device.GetChosenGPUDevice(), vertexBufferMemory, nullptr);
 
-    vkDestroyBuffer(device.GetChosenDevice(), indexBuffer, nullptr);
-    vkFreeMemory(device.GetChosenDevice(), indexBufferMemory, nullptr);
+    vkDestroyBuffer(device.GetChosenGPUDevice(), indexBuffer, nullptr);
+    vkFreeMemory(device.GetChosenGPUDevice(), indexBufferMemory, nullptr);
     
-    vkDestroyPipeline(device.GetChosenDevice(), graphicsPipeline, nullptr);
-    vkDestroyPipelineLayout(device.GetChosenDevice(), pipelineLayout, nullptr);
+    vkDestroyPipeline(device.GetChosenGPUDevice(), graphicsPipeline, nullptr);
+    vkDestroyPipelineLayout(device.GetChosenGPUDevice(), pipelineLayout, nullptr);
 }
 
 uint32_t Pipelines::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties, DeviceQuery& device)
@@ -304,7 +305,7 @@ VkShaderModule Pipelines::CreateShaderModule(const std::vector<char>& code, Devi
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
     VkShaderModule shaderModule;
-    if (vkCreateShaderModule(deviceQury.GetChosenDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
+    if (vkCreateShaderModule(deviceQury.GetChosenGPUDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create Shader Module!");
     }
@@ -321,25 +322,25 @@ void Pipelines::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemo
     bufferInfo.usage = usage;
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    if (vkCreateBuffer(device.GetChosenDevice(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
+    if (vkCreateBuffer(device.GetChosenGPUDevice(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to Create Buffer!");
     }
 
     VkMemoryRequirements memRequirements;
-    vkGetBufferMemoryRequirements(device.GetChosenDevice(), buffer, &memRequirements);
+    vkGetBufferMemoryRequirements(device.GetChosenGPUDevice(), buffer, &memRequirements);
 
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, properties, device);
 
-    if (vkAllocateMemory(device.GetChosenDevice(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
+    if (vkAllocateMemory(device.GetChosenGPUDevice(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to Allocate Buffer!");
     }
 
-    vkBindBufferMemory(device.GetChosenDevice(), buffer, bufferMemory, 0);
+    vkBindBufferMemory(device.GetChosenGPUDevice(), buffer, bufferMemory, 0);
 }
 
 void Pipelines::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size, CommandBuffer& commandBuf, DeviceQuery& device)
@@ -351,7 +352,7 @@ void Pipelines::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize 
     allocInfo.commandBufferCount = 1;
 
     VkCommandBuffer commandBuffer;
-    vkAllocateCommandBuffers(device.GetChosenDevice(), &allocInfo, &commandBuffer);
+    vkAllocateCommandBuffers(device.GetChosenGPUDevice(), &allocInfo, &commandBuffer);
 
     VkCommandBufferBeginInfo beginInfo {};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -374,5 +375,5 @@ void Pipelines::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize 
     vkQueueSubmit(device.GetGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
     vkQueueWaitIdle(device.GetGraphicsQueue());
 
-    vkFreeCommandBuffers(device.GetChosenDevice(), commandBuf.GetCommandPool(), 1, &commandBuffer);
+    vkFreeCommandBuffers(device.GetChosenGPUDevice(), commandBuf.GetCommandPool(), 1, &commandBuffer);
 }

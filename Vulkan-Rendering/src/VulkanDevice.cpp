@@ -1,17 +1,41 @@
 ﻿#include "VulkanDevice.h"
 
+#include "DeviceQuery.h"
+#include "VulkanInstance.h"
+#include "VulkanSurface.h"
+#include "SwapChain.h"
+#include "RenderPass.h"
+#include "Pipelines.h"
+#include "CommandBuffer.h"
+
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
     auto app = reinterpret_cast<VulkanDevice*>(glfwGetWindowUserPointer(window));
-    app->VCommandBuffer.SetFrameBufferResized(true);
+    app->GetVulkanCore()->GetCommandBuffer()->SetFrameBufferResized(true);
 }
 
 VulkanDevice::VulkanDevice()
 {
+    VInstance = new VulkanInstance();
+    VSurface = new VulkanSurface();
+    VDeviceQuery = new DeviceQuery();
+    VSwapChain = new SwapChain();
+    VRenderPass = new RenderPass();
+    VCommandBuffer = new CommandBuffer();
+    VPipeline = new Pipelines();
+    VCore = new VulkanCore();
 }
 
 VulkanDevice::~VulkanDevice()
 {
+    VInstance = nullptr;
+    VSurface = nullptr;
+    VDeviceQuery = nullptr;
+    VSwapChain = nullptr;
+    VRenderPass = nullptr;
+    VCommandBuffer = nullptr;
+    VPipeline = nullptr;
+    VCore = nullptr;
 }
 
 void VulkanDevice::RunApplication()
@@ -20,6 +44,11 @@ void VulkanDevice::RunApplication()
     InitVulkan();
     MainLoop();
     CleanUp();
+}
+
+VulkanCore* VulkanDevice::GetVulkanCore()
+{
+    return VCore;
 }
 
 void VulkanDevice::InitWindow()
@@ -36,21 +65,35 @@ void VulkanDevice::InitWindow()
 
 void VulkanDevice::InitVulkan()
 {
-    VInstance.CreateVulkanInstance();
-    VInstance.SetupDebugMessenger();
-    VSurface.CreateSurface(VInstance.GetVulkanInstance(), window);
-    VDeviceQuery.PickPhysicalDevice(VInstance.GetVulkanInstance(), VSurface.GetVulkanSurface(), VSwapChain);
-    VDeviceQuery.CreateLogicalDevice(VSurface.GetVulkanSurface(), VInstance.GetEnableValidation(), VInstance.GetValidationLayers());
-    VSwapChain.CreateSwapChain(VDeviceQuery, VSurface, window);
-    VSwapChain.CreateImageViews(VDeviceQuery);
-    VRenderPass.CreateRenderPass(VDeviceQuery, VSwapChain);
-    VPipeline.CreateGraphicsPipeline(VDeviceQuery, VRenderPass);
-    VSwapChain.CreateFrameBuffers(VDeviceQuery, VRenderPass);
-    VCommandBuffer.CreateCommandPool(VDeviceQuery, VSurface);
-    VPipeline.CreateVertexBuffer(VDeviceQuery, VCommandBuffer);
-    VPipeline.CreateIndexBuffer(VDeviceQuery, VCommandBuffer);
-    VCommandBuffer.CreateCommandBuffers(VDeviceQuery);
-    VCommandBuffer.CreateSyncObjects(VDeviceQuery);
+    VCore->SetInstance(VInstance);
+    VInstance->CreateVulkanInstance();
+    VInstance->SetupDebugMessenger();
+
+    VCore->SetSurface(VSurface);
+    VSurface->CreateSurface(VCore, window);
+
+    VCore->SetDevice(VDeviceQuery);
+    VDeviceQuery->PickPhysicalDevice(VCore);
+    VDeviceQuery->CreateLogicalDevice(VCore);
+
+    VCore->SetSwapChain(VSwapChain);
+    VSwapChain->CreateSwapChain(window, VCore);
+    VSwapChain->CreateImageViews(VCore);
+
+    VCore->SetRenderPass(VRenderPass);
+    VRenderPass->CreateRenderPass(VCore);
+    VPipeline->CreateGraphicsPipeline(VCore);
+    
+    VSwapChain->CreateFrameBuffers(VCore);
+
+    VCore->SetCommandBuffer(VCommandBuffer);
+    VCommandBuffer->CreateCommandPool(VCore);
+
+    VCore->SetPipeline(VPipeline);
+    VPipeline->CreateVertexBuffer(VCore);
+    VPipeline->CreateIndexBuffer(VCore);
+    VCommandBuffer->CreateCommandBuffers(VCore);
+    VCommandBuffer->CreateSyncObjects(VCore);
 }
 
 void VulkanDevice::MainLoop()
@@ -58,32 +101,32 @@ void VulkanDevice::MainLoop()
     while(glfwWindowShouldClose(window) == false)
     {
         glfwPollEvents();
-        VCommandBuffer.DrawFrame(VDeviceQuery, VSwapChain, VPipeline, VRenderPass, VSurface, window);
+        VCommandBuffer->DrawFrame(window, VCore);
     }
 
-    vkDeviceWaitIdle(VDeviceQuery.GetChosenDevice());
+    vkDeviceWaitIdle(VDeviceQuery->GetChosenGPUDevice());
 }
 
-void VulkanDevice::CleanUp()
+void VulkanDevice::CleanUp() const
 {
-    VCommandBuffer.CleanUp(VDeviceQuery);
+    VCommandBuffer->CleanUp(*VDeviceQuery);
 
-    VSwapChain.CleanUpSwapChain(VDeviceQuery);
+    VSwapChain->CleanUpSwapChain(VCore);
 
-    VPipeline.CleanUp(VDeviceQuery);
+    VPipeline->CleanUp(*VDeviceQuery);
 
-    vkDestroyRenderPass(VDeviceQuery.GetChosenDevice(), VRenderPass.GetRenderPass(), nullptr);
+    vkDestroyRenderPass(VDeviceQuery->GetChosenGPUDevice(), VRenderPass->GetRenderPass(), nullptr);
     
-    vkDestroyDevice(VDeviceQuery.GetChosenDevice(), nullptr);
+    vkDestroyDevice(VDeviceQuery->GetChosenGPUDevice(), nullptr);
     
-    if (VInstance.GetEnableValidation())
+    if (VInstance->GetEnableValidation())
     {
-        DestroyDebugUtilsMessengerEXT(VInstance.GetVulkanInstance(), VInstance.GetDebugMessenger(), nullptr);
+        DestroyDebugUtilsMessengerEXT(VInstance->GetVulkanInstance(), VInstance->GetDebugMessenger(), nullptr);
     }
 
-    vkDestroySurfaceKHR(VInstance.GetVulkanInstance(), VSurface.GetVulkanSurface(), nullptr);
+    vkDestroySurfaceKHR(VInstance->GetVulkanInstance(), VSurface->GetVulkanSurface(), nullptr);
     
-    vkDestroyInstance(VInstance.GetVulkanInstance(), nullptr);
+    vkDestroyInstance(VInstance->GetVulkanInstance(), nullptr);
     
     glfwDestroyWindow(window);
 

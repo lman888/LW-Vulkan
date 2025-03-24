@@ -9,6 +9,8 @@ class DeviceQuery;
 class RenderPass;
 class CommandBuffer;
 
+class VulkanCore;
+
 //Replace into class later
 #include <glm/glm.hpp>
 #include <array>
@@ -64,10 +66,10 @@ public:
     Pipelines();
     ~Pipelines();
 
-    void CreateGraphicsPipeline(DeviceQuery& deviceQuery, RenderPass& renderPass);
+    void CreateGraphicsPipeline(VulkanCore* vulkanCore);
 
-    void CreateVertexBuffer(DeviceQuery& device, CommandBuffer& commandBuffer);
-    void CreateIndexBuffer(DeviceQuery& device, CommandBuffer& commandBuffer);
+    void CreateVertexBuffer(VulkanCore* vulkanCore);
+    void CreateIndexBuffer(VulkanCore* vulkanCore);
 
     VkPipelineLayout& GetPipelineLayout();
     VkPipeline& GetGraphicsPipeline();

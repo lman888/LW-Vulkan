@@ -3,10 +3,13 @@
 #include <vector>
 #include "SwapChain.h"
 #include "set"
+#include "VulkanCore.h"
+#include "VulkanInstance.h"
+#include "VulkanSurface.h"
 
 DeviceQuery::DeviceQuery()
 {
-    chosenDevice = nullptr;
+    chosenDevice = VkDevice();
     physicalDevice = VK_NULL_HANDLE;
 }
 
@@ -24,10 +27,10 @@ DeviceQuery::~DeviceQuery()
  * Another aspect of finding a suitable device is Queue Families. Queue families each have their own subset of commands. Example, there could be a queue family that only allows processing of compute commands, or one that allows
  * memory transfer related commands.
  */
-void DeviceQuery::PickPhysicalDevice(VkInstance instance, VkSurfaceKHR surface, SwapChain swapChain)
+void DeviceQuery::PickPhysicalDevice(VulkanCore* vulkanCore)
 {
     uint32_t deviceCount = 0;
-    vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+    vkEnumeratePhysicalDevices(vulkanCore->GetInstance()->GetVulkanInstance(), &deviceCount, nullptr);
 
     if (deviceCount == 0)
     {
@@ -35,11 +38,11 @@ void DeviceQuery::PickPhysicalDevice(VkInstance instance, VkSurfaceKHR surface, 
     }
 
     std::vector<VkPhysicalDevice> devices(deviceCount);
-    vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+    vkEnumeratePhysicalDevices(vulkanCore->GetInstance()->GetVulkanInstance(), &deviceCount, devices.data());
 
     for (const auto& device : devices)
     {
-        if (IsDeviceSuitable(device, surface, swapChain))
+        if (IsDeviceSuitable(device, vulkanCore))
         {
             physicalDevice = device;
             break;
@@ -57,9 +60,9 @@ void DeviceQuery::PickPhysicalDevice(VkInstance instance, VkSurfaceKHR surface, 
  *
  * A Logical device represents an instance of the implementation with its own state and resources independant of other logical devices.
  */
-void DeviceQuery::CreateLogicalDevice(VkSurfaceKHR surface, bool enableValidationLayers, std::vector<const char*> validationLayers)
+void DeviceQuery::CreateLogicalDevice(VulkanCore* vulkanCore)
 {
-    QueueFamilyIndices indices = FindQueueFamilies(physicalDevice, surface);
+    QueueFamilyIndices indices = FindQueueFamilies(vulkanCore);
 
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
@@ -85,16 +88,6 @@ void DeviceQuery::CreateLogicalDevice(VkSurfaceKHR surface, bool enableValidatio
     createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
     createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
-    if (enableValidationLayers)
-    {
-        createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-        createInfo.ppEnabledLayerNames = validationLayers.data();
-    }
-    else
-    {
-        createInfo.enabledLayerCount = 0;
-    }
-
     if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &chosenDevice) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create Logical Device!");
@@ -119,26 +112,26 @@ VkQueue& DeviceQuery::GetPresentQueue()
     return presentQueue;
 }
 
-VkDevice& DeviceQuery::GetChosenDevice()
+VkDevice& DeviceQuery::GetChosenGPUDevice()
 {
     return chosenDevice;
 }
 
-QueueFamilyIndices DeviceQuery::FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface)
+QueueFamilyIndices DeviceQuery::FindQueueFamilies(VulkanCore* vulkanCore)
 {
     QueueFamilyIndices indices;
 
     uint32_t queueFamilyCount = 0;
-    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
 
     std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
 
     int i = 0;
     for (const auto& queueFamily : queueFamilies)
     {
         VkBool32 presentSupport = false;
-        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
+        vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, vulkanCore->GetSurface()->GetVulkanSurface(), &presentSupport);
 
         if (presentSupport)
         {
@@ -161,21 +154,22 @@ QueueFamilyIndices DeviceQuery::FindQueueFamilies(VkPhysicalDevice device, VkSur
     return indices;
 }
 
-bool DeviceQuery::IsDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface, SwapChain swapChain)
+bool DeviceQuery::IsDeviceSuitable(VkPhysicalDevice device, VulkanCore* vulkanCore)
 {
     VkPhysicalDeviceProperties deviceProperties;
     vkGetPhysicalDeviceProperties(device, &deviceProperties);
     VkPhysicalDeviceFeatures deviceFeatures;
     vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
 
-    QueueFamilyIndices indices = FindQueueFamilies(device, surface);
+    vulkanCore->GetChosenDevice()->physicalDevice = device;
+    QueueFamilyIndices indices = FindQueueFamilies(vulkanCore);
 
     bool extensionsSupported = CheckDeviceExtensionSupport(device);
 
     bool swapChainAdequate = false;
     if (extensionsSupported)
     {
-        SwapChainSupportDetails swapChainSupport = swapChain.QuerySwapChainSupport(device, surface);
+        SwapChainSupportDetails swapChainSupport = vulkanCore->GetSwapChain()->QuerySwapChainSupport(vulkanCore);
         swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
     }
     

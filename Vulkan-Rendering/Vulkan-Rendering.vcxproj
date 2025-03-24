@@ -184,6 +184,7 @@
     <ClCompile Include="src\Pipelines.cpp" />
     <ClCompile Include="src\RenderPass.cpp" />
     <ClCompile Include="src\Vulkan-Rendering.cpp" />
+    <ClCompile Include="src\VulkanCore.cpp" />
     <ClCompile Include="src\VulkanDevice.cpp">
       <RuntimeLibrary>MultiThreadedDebugDll</RuntimeLibrary>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -269,6 +270,7 @@
     <ClInclude Include="src\DeviceQuery.h" />
     <ClInclude Include="src\Pipelines.h" />
     <ClInclude Include="src\RenderPass.h" />
+    <ClInclude Include="src\VulkanCore.h" />
     <ClInclude Include="src\VulkanDevice.h" />
     <ClInclude Include="src\VulkanIncludes.h" />
     <ClInclude Include="src\VulkanInstance.h" />

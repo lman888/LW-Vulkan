@@ -3,6 +3,10 @@
 #include <iostream>
 #include <vector>
 
+//Project Includes
+#include "VulkanCore.h"
+#include "VulkanInstance.h"
+
 VulkanSurface::VulkanSurface()
 {
     surface = nullptr;
@@ -25,9 +29,9 @@ VkSurfaceKHR& VulkanSurface::GetVulkanSurface()
  *
  * The Window Surface needs to be created right after the instance creation, because it can actually influence the physical device selection. 
  */
-void VulkanSurface::CreateSurface(VkInstance& instance, GLFWwindow* window)
+void VulkanSurface::CreateSurface(VulkanCore* vulkanCore, GLFWwindow* window)
 {
-    if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS)
+    if (glfwCreateWindowSurface(vulkanCore->GetInstance()->GetVulkanInstance(), window, nullptr, &surface) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create a Window Surface!");
     }

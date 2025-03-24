@@ -2,8 +2,7 @@
 
 #include "VulkanIncludes.h"
 
-class DeviceQuery;
-class SwapChain;
+class VulkanCore;
 
 class RenderPass
 {
@@ -12,7 +11,7 @@ public:
     RenderPass();
     ~RenderPass();
     
-    void CreateRenderPass(DeviceQuery device, SwapChain swapChain);
+    void CreateRenderPass(VulkanCore* vulkanCore);
 
     VkRenderPass GetRenderPass() const;
 private:

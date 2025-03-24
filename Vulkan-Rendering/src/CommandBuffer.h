@@ -9,6 +9,7 @@ class VulkanSurface;
 class RenderPass;
 class SwapChain;
 class Pipelines;
+class VulkanCore;
 
 class CommandBuffer
 {
@@ -17,16 +18,16 @@ public:
     ~CommandBuffer();
     
 
-    void CreateCommandPool(DeviceQuery& device, VulkanSurface& surface);
-    void CreateCommandBuffers(DeviceQuery& device);
+    void CreateCommandPool(VulkanCore* vulkanCore);
+    void CreateCommandBuffers(VulkanCore* vulkanCore);
     
-    void RecordCommandBuffer(uint32_t imageIndex, RenderPass& renderPass, SwapChain& swapChain, Pipelines& pipeline);
+    void RecordCommandBuffer(uint32_t imageIndex, VulkanCore* vulkanCore);
 
-    void CreateSyncObjects(DeviceQuery& device);
+    void CreateSyncObjects(VulkanCore* vulkanCore);
 
     void CleanUp(DeviceQuery& device) const;
 
-    void DrawFrame(DeviceQuery& device, SwapChain& swapChain, Pipelines& pipeline, RenderPass& renderPass, VulkanSurface& surface, GLFWwindow* window);
+    void DrawFrame(GLFWwindow* window, VulkanCore* vulkanCore);
 
     VkCommandBuffer &GetCommandBuffer();
     VkCommandPool& GetCommandPool();

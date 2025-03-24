@@ -7,6 +7,7 @@
 #include "RenderPass.h"
 #include "VulkanSurface.h"
 #include "SwapChain.h"
+#include "VulkanCore.h"
 
 CommandBuffer::CommandBuffer()
 {
@@ -19,16 +20,16 @@ CommandBuffer::~CommandBuffer()
 /*
  * The Command Pool manages the memory that is used to store the buffers and command buffers are allocated from there.
  */
-void CommandBuffer::CreateCommandPool(DeviceQuery& device, VulkanSurface& surface)
+void CommandBuffer::CreateCommandPool(VulkanCore* vulkanCore)
 {
-    QueueFamilyIndices queueFamilyIndices = device.FindQueueFamilies(device.GetPhysicalDevice(), surface.GetVulkanSurface());
+    QueueFamilyIndices queueFamilyIndices = vulkanCore->GetChosenDevice()->FindQueueFamilies(vulkanCore);
 
     VkCommandPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
-    if (vkCreateCommandPool(device.GetChosenDevice(), &poolInfo, nullptr, &commandPool) != VK_SUCCESS)
+    if (vkCreateCommandPool(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), &poolInfo, nullptr, &commandPool) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create Command Pool!");
     }
@@ -39,7 +40,7 @@ void CommandBuffer::CreateCommandPool(DeviceQuery& device, VulkanSurface& surfac
  * The advantage to this is when we are ready to tell Vulkan what we want to do, all the commands are submitted together and Vulkan can more efficiently process the commands since all of them are available together.
  * This also allows commands to be recorded to happen in multiple threads if we desire.
  */
-void CommandBuffer::CreateCommandBuffers(DeviceQuery& device)
+void CommandBuffer::CreateCommandBuffers(VulkanCore* vulkanCore)
 {
     commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
     
@@ -51,13 +52,13 @@ void CommandBuffer::CreateCommandBuffers(DeviceQuery& device)
 
     allocInfo.commandBufferCount = (uint32_t) commandBuffers.size();
     
-    if (vkAllocateCommandBuffers(device.GetChosenDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS)
+    if (vkAllocateCommandBuffers(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to allocate Command Buffers!");
     }
 }
 
-void CommandBuffer::RecordCommandBuffer(uint32_t imageIndex, RenderPass& renderPass, SwapChain& swapChain, Pipelines& pipeline)
+void CommandBuffer::RecordCommandBuffer(uint32_t imageIndex, VulkanCore* vulkanCore)
 {
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -71,10 +72,10 @@ void CommandBuffer::RecordCommandBuffer(uint32_t imageIndex, RenderPass& renderP
 
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = renderPass.GetRenderPass();
-    renderPassInfo.framebuffer = swapChain.GetSwapChainFrameBuffers()[imageIndex];
+    renderPassInfo.renderPass = vulkanCore->GetRenderPass()->GetRenderPass();
+    renderPassInfo.framebuffer = vulkanCore->GetSwapChain()->GetSwapChainFrameBuffers()[imageIndex];
     renderPassInfo.renderArea.offset = {0, 0};
-    renderPassInfo.renderArea.extent = swapChain.GetSwapChainImageExtent();
+    renderPassInfo.renderArea.extent = vulkanCore->GetSwapChain()->GetSwapChainImageExtent();
 
     VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
     renderPassInfo.clearValueCount = 1;
@@ -82,25 +83,25 @@ void CommandBuffer::RecordCommandBuffer(uint32_t imageIndex, RenderPass& renderP
 
     vkCmdBeginRenderPass(commandBuffers[currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-    vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.GetGraphicsPipeline());
+    vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, vulkanCore->GetPipeline()->GetGraphicsPipeline());
 
-    VkBuffer vertexBuffers[] = { pipeline.GetVertexBuffer() };
+    VkBuffer vertexBuffers[] = { vulkanCore->GetPipeline()->GetVertexBuffer() };
     VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
-    vkCmdBindIndexBuffer(commandBuffers[currentFrame], pipeline.GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT16);
+    vkCmdBindIndexBuffer(commandBuffers[currentFrame], vulkanCore->GetPipeline()->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT16);
     
     VkViewport viewPort{};
     viewPort.x = 0.0f;
     viewPort.y = 0.0f;
-    viewPort.width = (float)swapChain.GetSwapChainImageExtent().width;
-    viewPort.height = (float)swapChain.GetSwapChainImageExtent().height;
+    viewPort.width = (float)vulkanCore->GetSwapChain()->GetSwapChainImageExtent().width;
+    viewPort.height = (float)vulkanCore->GetSwapChain()->GetSwapChainImageExtent().height;
     viewPort.minDepth = 0.0f;
     viewPort.maxDepth = 1.0f;
     vkCmdSetViewport(commandBuffers[currentFrame], 0, 1, &viewPort);
 
     VkRect2D scissor{};
     scissor.offset = {0, 0};
-    scissor.extent = swapChain.GetSwapChainImageExtent();
+    scissor.extent = vulkanCore->GetSwapChain()->GetSwapChainImageExtent();
     vkCmdSetScissor(commandBuffers[currentFrame], 0, 1, &scissor);
     
     vkCmdDrawIndexed(commandBuffers[currentFrame], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
@@ -113,7 +114,7 @@ void CommandBuffer::RecordCommandBuffer(uint32_t imageIndex, RenderPass& renderP
     }
 }
 
-void CommandBuffer::CreateSyncObjects(DeviceQuery& device)
+void CommandBuffer::CreateSyncObjects(VulkanCore* vulkanCore)
 {
     imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
@@ -128,9 +129,9 @@ void CommandBuffer::CreateSyncObjects(DeviceQuery& device)
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
-        if (vkCreateSemaphore(device.GetChosenDevice(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
-            vkCreateSemaphore(device.GetChosenDevice(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
-            vkCreateFence(device.GetChosenDevice(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS)
+        if (vkCreateSemaphore(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
+            vkCreateSemaphore(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
+            vkCreateFence(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create Semaphores!");
         }
@@ -141,12 +142,12 @@ void CommandBuffer::CleanUp(DeviceQuery& device) const
 {
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
-        vkDestroySemaphore(device.GetChosenDevice(), imageAvailableSemaphores[i], nullptr);
-        vkDestroySemaphore(device.GetChosenDevice(), renderFinishedSemaphores[i], nullptr);
-        vkDestroyFence(device.GetChosenDevice(), inFlightFences[i], nullptr);
+        vkDestroySemaphore(device.GetChosenGPUDevice(), imageAvailableSemaphores[i], nullptr);
+        vkDestroySemaphore(device.GetChosenGPUDevice(), renderFinishedSemaphores[i], nullptr);
+        vkDestroyFence(device.GetChosenGPUDevice(), inFlightFences[i], nullptr);
     }
 
-    vkDestroyCommandPool(device.GetChosenDevice(), commandPool, nullptr);
+    vkDestroyCommandPool(device.GetChosenGPUDevice(), commandPool, nullptr);
 }
 
 /*
@@ -157,16 +158,16 @@ void CommandBuffer::CleanUp(DeviceQuery& device) const
  * - Submit the recorded command buffer
  * - Present the swap chain image
  */
-void CommandBuffer::DrawFrame(DeviceQuery& device, SwapChain& swapChain, Pipelines& pipeline, RenderPass& renderPass, VulkanSurface& surface, GLFWwindow* window)
+void CommandBuffer::DrawFrame(GLFWwindow* window, VulkanCore* vulkanCore)
 {
-    vkWaitForFences(device.GetChosenDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+    vkWaitForFences(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
     
     uint32_t imageIndex;
-    VkResult result = vkAcquireNextImageKHR(device.GetChosenDevice(), swapChain.GetSwapChain(), UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+    VkResult result = vkAcquireNextImageKHR(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), vulkanCore->GetSwapChain()->GetSwapChain(), UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR)
     {
-        swapChain.ReCreateSwapChain(device, surface, renderPass, window);
+        vulkanCore->GetSwapChain()->ReCreateSwapChain(window, vulkanCore);
         return;
     }
     if(result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
@@ -174,10 +175,10 @@ void CommandBuffer::DrawFrame(DeviceQuery& device, SwapChain& swapChain, Pipelin
         throw std::runtime_error("Failed to acquire Swap Chain Image!");
     }
     
-    vkResetFences(device.GetChosenDevice(), 1, &inFlightFences[currentFrame]);
+    vkResetFences(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), 1, &inFlightFences[currentFrame]);
     vkResetCommandBuffer(commandBuffers[currentFrame], 0);
 
-    RecordCommandBuffer(imageIndex, renderPass, swapChain, pipeline);
+    RecordCommandBuffer(imageIndex, vulkanCore);
 
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -195,7 +196,7 @@ void CommandBuffer::DrawFrame(DeviceQuery& device, SwapChain& swapChain, Pipelin
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    if (vkQueueSubmit(device.GetGraphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
+    if (vkQueueSubmit(vulkanCore->GetChosenDevice()->GetGraphicsQueue(), 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to submit Draw Command Buffer!");
     }
@@ -205,17 +206,17 @@ void CommandBuffer::DrawFrame(DeviceQuery& device, SwapChain& swapChain, Pipelin
     presentInfo.waitSemaphoreCount = 1;
     presentInfo.pWaitSemaphores = signalSemaphores;
 
-    VkSwapchainKHR swapChains[] = { swapChain.GetSwapChain() };
+    VkSwapchainKHR swapChains[] = { vulkanCore->GetSwapChain()->GetSwapChain() };
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = &imageIndex;
     presentInfo.pResults = nullptr; //Optional
     
-    result = vkQueuePresentKHR(device.GetPresentQueue(), &presentInfo);
+    result = vkQueuePresentKHR(vulkanCore->GetChosenDevice()->GetPresentQueue(), &presentInfo);
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || frameBufferResized)
     {
         frameBufferResized = false;
-        swapChain.ReCreateSwapChain(device, surface, renderPass, window);
+        vulkanCore->GetSwapChain()->ReCreateSwapChain(window, vulkanCore);
     }
     else if(result != VK_SUCCESS)
     {

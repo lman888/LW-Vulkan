@@ -5,7 +5,7 @@
 
 VulkanInstance::VulkanInstance()
 {
-    instance = nullptr;
+    
 }
 
 VulkanInstance::~VulkanInstance()

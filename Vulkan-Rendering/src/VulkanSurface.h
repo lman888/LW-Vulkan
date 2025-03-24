@@ -4,13 +4,16 @@
 
 #include <vector>
 
+//Project Classes
+class VulkanCore;
+
 class VulkanSurface
 {
 public:
     VulkanSurface();
     ~VulkanSurface();
     
-    void CreateSurface(VkInstance& instance, GLFWwindow* window);
+    void CreateSurface(VulkanCore* vulkanCore, GLFWwindow* window);
 
     VkSurfaceKHR& GetVulkanSurface();
 

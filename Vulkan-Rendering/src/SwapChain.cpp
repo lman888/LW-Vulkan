@@ -6,6 +6,7 @@
 #include "DeviceQuery.h"
 #include "VulkanSurface.h"
 #include "RenderPass.h"
+#include "VulkanCore.h"
 
 SwapChain::SwapChain()
 {
@@ -30,11 +31,11 @@ SwapChain::~SwapChain()
  * How exactly the queue works and the conditions for presenting an image from the queue depend on how the swap chain is set up, but the general purpose of the swap chain is to synchronize the presentation of images with the refresh
  * rate of the screen.
  */
-void SwapChain::CreateSwapChain(DeviceQuery& deviceQuery, VulkanSurface& surface, GLFWwindow* window)
+void SwapChain::CreateSwapChain(GLFWwindow* window, VulkanCore* vulkanCore)
 {
-    SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport(deviceQuery.GetPhysicalDevice(), surface.GetVulkanSurface());
+    SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport(vulkanCore);
 
-    VkSurfaceFormatKHR surfaceFormat = surface.ChooseSwapSurfaceFormat(swapChainSupport.formats);
+    VkSurfaceFormatKHR surfaceFormat = vulkanCore->GetSurface()->ChooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = ChooseSwapPresentMode(swapChainSupport.presentModes);
     VkExtent2D extent = ChooseSwapExtent(swapChainSupport.capabilities, window);
 
@@ -50,7 +51,7 @@ void SwapChain::CreateSwapChain(DeviceQuery& deviceQuery, VulkanSurface& surface
     
     VkSwapchainCreateInfoKHR createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    createInfo.surface = surface.GetVulkanSurface();
+    createInfo.surface = vulkanCore->GetSurface()->GetVulkanSurface();
     createInfo.minImageCount = imageCount;
     createInfo.imageFormat = surfaceFormat.format;
     createInfo.imageColorSpace = surfaceFormat.colorSpace;
@@ -58,7 +59,7 @@ void SwapChain::CreateSwapChain(DeviceQuery& deviceQuery, VulkanSurface& surface
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-    QueueFamilyIndices indices = deviceQuery.FindQueueFamilies(deviceQuery.GetPhysicalDevice(), surface.GetVulkanSurface());
+    QueueFamilyIndices indices = vulkanCore->GetChosenDevice()->FindQueueFamilies(vulkanCore);
     uint32_t queueFamilyIndices[]{ indices.graphicsFamily.value(), indices.presentFamily.value() };
 
     if (indices.graphicsFamily != indices.presentFamily)
@@ -80,22 +81,22 @@ void SwapChain::CreateSwapChain(DeviceQuery& deviceQuery, VulkanSurface& surface
     createInfo.clipped = VK_TRUE;
     createInfo.oldSwapchain = oldSwapChain;
 
-    if (vkCreateSwapchainKHR(deviceQuery.GetChosenDevice(), &createInfo, nullptr, &swapChain) != VK_SUCCESS)
+    if (vkCreateSwapchainKHR(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), &createInfo, nullptr, &swapChain) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to Create a Swap Chain!");
     }
 
-    vkGetSwapchainImagesKHR(deviceQuery.GetChosenDevice(), swapChain, &imageCount, nullptr);
+    vkGetSwapchainImagesKHR(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), swapChain, &imageCount, nullptr);
     swapChainImages.resize(imageCount);
-    vkGetSwapchainImagesKHR(deviceQuery.GetChosenDevice(), swapChain, &imageCount, swapChainImages.data());
+    vkGetSwapchainImagesKHR(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), swapChain, &imageCount, swapChainImages.data());
 
     swapChainImageFormat = surfaceFormat.format;
     swapChainExtent = extent;
 
     if (oldSwapChain != VK_NULL_HANDLE)
     {
-        vkDeviceWaitIdle(deviceQuery.GetChosenDevice());
-        vkDestroySwapchainKHR(deviceQuery.GetChosenDevice(), oldSwapChain, nullptr);
+        vkDeviceWaitIdle(vulkanCore->GetChosenDevice()->GetChosenGPUDevice());
+        vkDestroySwapchainKHR(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), oldSwapChain, nullptr);
     }
 }
 
@@ -105,7 +106,7 @@ void SwapChain::CreateSwapChain(DeviceQuery& deviceQuery, VulkanSurface& surface
  * A Framebuffer object references all the VkImageView objects that represent the attachments. In this case that will be our color attachment. However, the image that we have to use for the attachment depends on which image
  * the swap chain returns when we retrieve one for presentation. That means that we have to create a framebuffer for all the images in the swap chain and use the one that corresponds to the retrieved image at drawing time.
  */
-void SwapChain::CreateFrameBuffers(DeviceQuery& deviceQuery, RenderPass& renderPass)
+void SwapChain::CreateFrameBuffers(VulkanCore* vulkanCore)
 {
     swapChainFrameBuffers.resize(swapChainImageViews.size());
     for (size_t i = 0; i < swapChainFrameBuffers.size(); i++)
@@ -114,14 +115,14 @@ void SwapChain::CreateFrameBuffers(DeviceQuery& deviceQuery, RenderPass& renderP
 
         VkFramebufferCreateInfo frameBufferInfo{};
         frameBufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        frameBufferInfo.renderPass = renderPass.GetRenderPass();
+        frameBufferInfo.renderPass = vulkanCore->GetRenderPass()->GetRenderPass();
         frameBufferInfo.attachmentCount = 1;
         frameBufferInfo.pAttachments = attachments;
         frameBufferInfo.width = swapChainExtent.width;
         frameBufferInfo.height = swapChainExtent.height;
         frameBufferInfo.layers = 1;
 
-        if (vkCreateFramebuffer(deviceQuery.GetChosenDevice(), &frameBufferInfo, nullptr, &swapChainFrameBuffers[i]) != VK_SUCCESS)
+        if (vkCreateFramebuffer(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), &frameBufferInfo, nullptr, &swapChainFrameBuffers[i]) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create a Framebuffer!");
         }
@@ -133,28 +134,28 @@ VkSwapchainKHR SwapChain::GetSwapChain()
 	return swapChain;
 }
 
-SwapChainSupportDetails SwapChain::QuerySwapChainSupport(VkPhysicalDevice& device, VkSurfaceKHR& surface)
+SwapChainSupportDetails SwapChain::QuerySwapChainSupport(VulkanCore* vulkanCore)
 {
     SwapChainSupportDetails details;
 
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface, &details.capabilities);
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vulkanCore->GetChosenDevice()->GetPhysicalDevice(), vulkanCore->GetSurface()->GetVulkanSurface(), &details.capabilities);
 
     uint32_t formatCount;
-    vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.formats.data());
+    vkGetPhysicalDeviceSurfaceFormatsKHR(vulkanCore->GetChosenDevice()->GetPhysicalDevice(), vulkanCore->GetSurface()->GetVulkanSurface(), &formatCount, details.formats.data());
 
     if (formatCount != 0)
     {
         details.formats.resize(formatCount);
-        vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, details.formats.data());
+        vkGetPhysicalDeviceSurfaceFormatsKHR(vulkanCore->GetChosenDevice()->GetPhysicalDevice(), vulkanCore->GetSurface()->GetVulkanSurface(), &formatCount, details.formats.data());
     }
 
     uint32_t presentModeCount;
-    vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, nullptr);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(vulkanCore->GetChosenDevice()->GetPhysicalDevice(), vulkanCore->GetSurface()->GetVulkanSurface(), &presentModeCount, nullptr);
 
     if (presentModeCount != 0)
     {
         details.presentModes.resize(presentModeCount);
-        vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface, &presentModeCount, details.presentModes.data());
+        vkGetPhysicalDeviceSurfacePresentModesKHR(vulkanCore->GetChosenDevice()->GetPhysicalDevice(), vulkanCore->GetSurface()->GetVulkanSurface(), &presentModeCount, details.presentModes.data());
     }
 
     return details;
@@ -163,7 +164,7 @@ SwapChainSupportDetails SwapChain::QuerySwapChainSupport(VkPhysicalDevice& devic
 /*
  * An Image View is quite literally a view into an image. It describes how to access the image and which part of the image to access, for example if it should be treated as a 2D texture depth texture without any mipmapping levels.
  */
-void SwapChain::CreateImageViews(DeviceQuery& deviceQuery)
+void SwapChain::CreateImageViews(VulkanCore* vulkanCore)
 {
     swapChainImageViews.resize(swapChainImages.size());
 
@@ -186,14 +187,14 @@ void SwapChain::CreateImageViews(DeviceQuery& deviceQuery)
         createInfo.subresourceRange.baseArrayLayer = 0;
         createInfo.subresourceRange.layerCount = 1;
 
-        if (vkCreateImageView(deviceQuery.GetChosenDevice(), &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS)
+        if (vkCreateImageView(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS)
         {
             throw std::runtime_error("Failed to create Image Views!");
         }
     }
 }
 
-void SwapChain::ReCreateSwapChain(DeviceQuery& device, VulkanSurface& surface, RenderPass& renderPass, GLFWwindow* window)
+void SwapChain::ReCreateSwapChain(GLFWwindow* window, VulkanCore* vulkanCore)
 {
     int width = 0;
     int height = 0;
@@ -205,13 +206,13 @@ void SwapChain::ReCreateSwapChain(DeviceQuery& device, VulkanSurface& surface, R
         glfwWaitEvents();
     }
     
-    vkDeviceWaitIdle(device.GetChosenDevice());
+    vkDeviceWaitIdle(vulkanCore->GetChosenDevice()->GetChosenGPUDevice());
 
-    CleanUpSwapChain(device);
+    CleanUpSwapChain(vulkanCore);
     
-    CreateSwapChain(device, surface, window);
-    CreateImageViews(device);
-    CreateFrameBuffers(device, renderPass);
+    CreateSwapChain(window, vulkanCore);
+    CreateImageViews(vulkanCore);
+    CreateFrameBuffers(vulkanCore);
 }
 
 std::vector<VkFramebuffer>& SwapChain::GetSwapChainFrameBuffers()
@@ -239,23 +240,23 @@ VkExtent2D& SwapChain::GetSwapChainImageExtent()
     return swapChainExtent;
 }
 
-void SwapChain::CleanUpSwapChain(DeviceQuery device)
+void SwapChain::CleanUpSwapChain(VulkanCore* vulkanCore)
 {
     for (VkFramebuffer& swapChainFrameBuffer : swapChainFrameBuffers)
     {
-        vkDestroyFramebuffer(device.GetChosenDevice(), swapChainFrameBuffer, nullptr);
+        vkDestroyFramebuffer(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), swapChainFrameBuffer, nullptr);
     }
     swapChainFrameBuffers.clear();
 
     for (VkImageView& swapChainImageView : swapChainImageViews)
     {
-        vkDestroyImageView(device.GetChosenDevice(), swapChainImageView, nullptr);
+        vkDestroyImageView(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), swapChainImageView, nullptr);
     }
     swapChainImageViews.clear();
 
     if (swapChain != VK_NULL_HANDLE)
     {
-        vkDestroySwapchainKHR(device.GetChosenDevice(), swapChain, nullptr);
+        vkDestroySwapchainKHR(vulkanCore->GetChosenDevice()->GetChosenGPUDevice(), swapChain, nullptr);
         swapChain = VK_NULL_HANDLE;
     }
 }
