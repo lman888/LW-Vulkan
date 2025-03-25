@@ -29,9 +29,9 @@ VkSurfaceKHR& VulkanSurface::GetVulkanSurface()
  *
  * The Window Surface needs to be created right after the instance creation, because it can actually influence the physical device selection. 
  */
-void VulkanSurface::CreateSurface(VulkanCore* vulkanCore, GLFWwindow* window)
+void VulkanSurface::CreateSurface(GLFWwindow* window)
 {
-    if (glfwCreateWindowSurface(vulkanCore->GetInstance()->GetVulkanInstance(), window, nullptr, &surface) != VK_SUCCESS)
+    if (glfwCreateWindowSurface(VulkanCore::GetInstance()->GetVulkanInstance(), window, nullptr, &surface) != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create a Window Surface!");
     }

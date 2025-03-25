@@ -13,7 +13,7 @@ public:
     
     void RunApplication();
 
-    VulkanCore* GetVulkanCore();
+    CommandBuffer* GetVulkanCommandBuffer();
 
 private:
     void InitWindow();
@@ -25,8 +25,6 @@ private:
 
     const uint32_t WIDTH = 800;
     const uint32_t HEIGHT = 600;
-
-    VulkanCore* VCore;
     
     CommandBuffer* VCommandBuffer;
     DeviceQuery* VDeviceQuery;

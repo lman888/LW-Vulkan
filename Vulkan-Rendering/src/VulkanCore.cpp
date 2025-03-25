@@ -1,16 +1,5 @@
 ﻿#include "VulkanCore.h"
 
-VulkanCore::VulkanCore()
-{
-    VDevice = nullptr;
-    VInstance = nullptr;
-    VSurface = nullptr;
-    VSwapChain = nullptr;
-    VCommandBuffer = nullptr;
-    VRenderPass = nullptr;
-    VPipeline = nullptr;
-}
-
 VulkanCore::~VulkanCore()
 {
     VDevice = nullptr;
@@ -24,70 +13,140 @@ VulkanCore::~VulkanCore()
 
 void VulkanCore::SetDevice(DeviceQuery* device)
 {
-    VDevice = device;
+    Get().ISetDevice(device);
 }
 
-DeviceQuery* VulkanCore::GetChosenDevice() const
+DeviceQuery* VulkanCore::GetChosenDevice()
 {
-    return VDevice;
+    return Get().IGetChosenDevice();
 }
 
 void VulkanCore::SetInstance(VulkanInstance* instance)
 {
-    VInstance = instance;
+    Get().ISetInstance(instance);
 }
 
-VulkanInstance* VulkanCore::GetInstance() const
+VulkanInstance* VulkanCore::GetInstance()
 {
-    return VInstance;
+    return Get().IGetInstance();
 }
 
 void VulkanCore::SetSurface(VulkanSurface* surface)
 {
-    VSurface = surface;
+    Get().ISetSurface(surface);
 }
 
-VulkanSurface* VulkanCore::GetSurface() const
+VulkanSurface* VulkanCore::GetSurface()
 {
-    return VSurface;
+    return Get().IGetSurface();
 }
 
 void VulkanCore::SetSwapChain(SwapChain* swapChain)
 {
-    VSwapChain = swapChain;
+    Get().ISetSwapChain(swapChain);
 }
 
-SwapChain* VulkanCore::GetSwapChain() const
+SwapChain* VulkanCore::GetSwapChain()
 {
-    return VSwapChain;
+    return Get().IGetSwapChain();
 }
 
 void VulkanCore::SetRenderPass(RenderPass* renderPass)
 {
-    VRenderPass = renderPass;
+    Get().ISetRenderPass(renderPass);
 }
 
-RenderPass* VulkanCore::GetRenderPass() const
+RenderPass* VulkanCore::GetRenderPass()
 {
-    return VRenderPass;
+    return Get().IGetRenderPass();
 }
 
 void VulkanCore::SetCommandBuffer(CommandBuffer* commandBuffer)
 {
-    VCommandBuffer = commandBuffer;
+    Get().ISetCommandBuffer(commandBuffer);
 }
 
 CommandBuffer* VulkanCore::GetCommandBuffer()
 {
-    return VCommandBuffer;
+    return Get().IGetCommandBuffer();
 }
 
 void VulkanCore::SetPipeline(Pipelines* pipeline)
 {
-    VPipeline = pipeline;
+    Get().ISetPipeline(pipeline);
 }
 
 Pipelines* VulkanCore::GetPipeline()
+{
+    return Get().IGetPipeline();
+}
+
+void VulkanCore::ISetDevice(DeviceQuery* device)
+{
+    VDevice = device;
+}
+
+DeviceQuery* VulkanCore::IGetChosenDevice() const
+{
+    return VDevice;
+}
+
+void VulkanCore::ISetInstance(VulkanInstance* instance)
+{
+    VInstance = instance;
+}
+
+VulkanInstance* VulkanCore::IGetInstance() const
+{
+    return VInstance;
+}
+
+void VulkanCore::ISetSurface(VulkanSurface* surface)
+{
+    VSurface = surface;
+}
+
+VulkanSurface* VulkanCore::IGetSurface() const
+{
+    return VSurface;
+}
+
+void VulkanCore::ISetSwapChain(SwapChain* swapChain)
+{
+    VSwapChain = swapChain;
+}
+
+SwapChain* VulkanCore::IGetSwapChain() const
+{
+    return VSwapChain;
+}
+
+void VulkanCore::ISetRenderPass(RenderPass* renderPass)
+{
+    VRenderPass = renderPass;
+}
+
+RenderPass* VulkanCore::IGetRenderPass() const
+{
+    return VRenderPass;
+}
+
+void VulkanCore::ISetCommandBuffer(CommandBuffer* commandBuffer)
+{
+    VCommandBuffer = commandBuffer;
+}
+
+CommandBuffer* VulkanCore::IGetCommandBuffer()
+{
+    return VCommandBuffer;
+}
+
+void VulkanCore::ISetPipeline(Pipelines* pipeline)
+{
+    VPipeline = pipeline;
+}
+
+Pipelines* VulkanCore::IGetPipeline()
 {
     return VPipeline;
 }

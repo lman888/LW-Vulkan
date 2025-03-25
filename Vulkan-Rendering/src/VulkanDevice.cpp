@@ -11,7 +11,7 @@
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
     auto app = reinterpret_cast<VulkanDevice*>(glfwGetWindowUserPointer(window));
-    app->GetVulkanCore()->GetCommandBuffer()->SetFrameBufferResized(true);
+    app->GetVulkanCommandBuffer()->SetFrameBufferResized(true);
 }
 
 VulkanDevice::VulkanDevice()
@@ -23,7 +23,6 @@ VulkanDevice::VulkanDevice()
     VRenderPass = new RenderPass();
     VCommandBuffer = new CommandBuffer();
     VPipeline = new Pipelines();
-    VCore = new VulkanCore();
 }
 
 VulkanDevice::~VulkanDevice()
@@ -35,7 +34,6 @@ VulkanDevice::~VulkanDevice()
     VRenderPass = nullptr;
     VCommandBuffer = nullptr;
     VPipeline = nullptr;
-    VCore = nullptr;
 }
 
 void VulkanDevice::RunApplication()
@@ -46,9 +44,9 @@ void VulkanDevice::RunApplication()
     CleanUp();
 }
 
-VulkanCore* VulkanDevice::GetVulkanCore()
+CommandBuffer* VulkanDevice::GetVulkanCommandBuffer()
 {
-    return VCore;
+    return VulkanCore::Get().GetCommandBuffer();
 }
 
 void VulkanDevice::InitWindow()
@@ -65,35 +63,36 @@ void VulkanDevice::InitWindow()
 
 void VulkanDevice::InitVulkan()
 {
-    VCore->SetInstance(VInstance);
-    VInstance->CreateVulkanInstance();
-    VInstance->SetupDebugMessenger();
-
-    VCore->SetSurface(VSurface);
-    VSurface->CreateSurface(VCore, window);
-
-    VCore->SetDevice(VDeviceQuery);
-    VDeviceQuery->PickPhysicalDevice(VCore);
-    VDeviceQuery->CreateLogicalDevice(VCore);
-
-    VCore->SetSwapChain(VSwapChain);
-    VSwapChain->CreateSwapChain(window, VCore);
-    VSwapChain->CreateImageViews(VCore);
-
-    VCore->SetRenderPass(VRenderPass);
-    VRenderPass->CreateRenderPass(VCore);
-    VPipeline->CreateGraphicsPipeline(VCore);
+    VulkanCore::SetInstance(VInstance);
+    VulkanCore::SetSurface(VSurface);
+    VulkanCore::SetDevice(VDeviceQuery);
+    VulkanCore::SetSwapChain(VSwapChain);
+    VulkanCore::SetRenderPass(VRenderPass);
+    VulkanCore::SetPipeline(VPipeline);
+    VulkanCore::SetCommandBuffer(VCommandBuffer);
     
-    VSwapChain->CreateFrameBuffers(VCore);
+    VulkanCore::GetInstance()->CreateVulkanInstance();
+    VulkanCore::GetInstance()->SetupDebugMessenger();
 
-    VCore->SetCommandBuffer(VCommandBuffer);
-    VCommandBuffer->CreateCommandPool(VCore);
+    VulkanCore::GetSurface()->CreateSurface(window);
 
-    VCore->SetPipeline(VPipeline);
-    VPipeline->CreateVertexBuffer(VCore);
-    VPipeline->CreateIndexBuffer(VCore);
-    VCommandBuffer->CreateCommandBuffers(VCore);
-    VCommandBuffer->CreateSyncObjects(VCore);
+    VulkanCore::GetChosenDevice()->PickPhysicalDevice();
+    VulkanCore::GetChosenDevice()->CreateLogicalDevice();
+
+    VulkanCore::GetSwapChain()->CreateSwapChain(window);
+    VulkanCore::GetSwapChain()->CreateImageViews();
+
+    VulkanCore::GetRenderPass()->CreateRenderPass();
+    VulkanCore::GetPipeline()->CreateGraphicsPipeline();
+    
+    VulkanCore::GetSwapChain()->CreateFrameBuffers();
+
+    VulkanCore::GetCommandBuffer()->CreateCommandPool();
+
+    VulkanCore::GetPipeline()->CreateVertexBuffer();
+    VulkanCore::GetPipeline()->CreateIndexBuffer();
+    VulkanCore::GetCommandBuffer()->CreateCommandBuffers();
+    VulkanCore::GetCommandBuffer()->CreateSyncObjects();
 }
 
 void VulkanDevice::MainLoop()
@@ -101,32 +100,32 @@ void VulkanDevice::MainLoop()
     while(glfwWindowShouldClose(window) == false)
     {
         glfwPollEvents();
-        VCommandBuffer->DrawFrame(window, VCore);
+        VulkanCore::GetCommandBuffer()->DrawFrame(window);
     }
 
-    vkDeviceWaitIdle(VDeviceQuery->GetChosenGPUDevice());
+    vkDeviceWaitIdle(VulkanCore::GetChosenDevice()->GetChosenGPUDevice());
 }
 
 void VulkanDevice::CleanUp() const
 {
-    VCommandBuffer->CleanUp(*VDeviceQuery);
+    VulkanCore::GetCommandBuffer()->CleanUp();
 
-    VSwapChain->CleanUpSwapChain(VCore);
+    VulkanCore::GetSwapChain()->CleanUpSwapChain();
 
-    VPipeline->CleanUp(*VDeviceQuery);
+    VulkanCore::GetPipeline()->CleanUp();
 
-    vkDestroyRenderPass(VDeviceQuery->GetChosenGPUDevice(), VRenderPass->GetRenderPass(), nullptr);
+    vkDestroyRenderPass(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), VulkanCore::GetRenderPass()->GetVulkanRenderPass(), nullptr);
     
-    vkDestroyDevice(VDeviceQuery->GetChosenGPUDevice(), nullptr);
+    vkDestroyDevice(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), nullptr);
     
-    if (VInstance->GetEnableValidation())
+    if (VulkanCore::GetInstance()->GetEnableValidation())
     {
-        DestroyDebugUtilsMessengerEXT(VInstance->GetVulkanInstance(), VInstance->GetDebugMessenger(), nullptr);
+        DestroyDebugUtilsMessengerEXT(VulkanCore::GetInstance()->GetVulkanInstance(), VulkanCore::GetInstance()->GetDebugMessenger(), nullptr);
     }
 
-    vkDestroySurfaceKHR(VInstance->GetVulkanInstance(), VSurface->GetVulkanSurface(), nullptr);
+    vkDestroySurfaceKHR(VulkanCore::GetInstance()->GetVulkanInstance(), VulkanCore::GetSurface()->GetVulkanSurface(), nullptr);
     
-    vkDestroyInstance(VInstance->GetVulkanInstance(), nullptr);
+    vkDestroyInstance(VulkanCore::GetInstance()->GetVulkanInstance(), nullptr);
     
     glfwDestroyWindow(window);
 

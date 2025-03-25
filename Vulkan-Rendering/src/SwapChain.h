@@ -19,17 +19,17 @@ public:
 	SwapChain();
 	~SwapChain();
 
-	void CreateSwapChain(GLFWwindow* window, VulkanCore* vulkanCore);
+	void CreateSwapChain(GLFWwindow* window);
 
-	void CreateFrameBuffers(VulkanCore* vulkanCore);
+	void CreateFrameBuffers();
 
-	VkSwapchainKHR GetSwapChain();
+	VkSwapchainKHR GetVulkanSwapChain();
 
-	SwapChainSupportDetails QuerySwapChainSupport(VulkanCore* vulkanCore);
+	SwapChainSupportDetails QuerySwapChainSupport();
 
-	void CreateImageViews(VulkanCore* vulkanCore);
+	void CreateImageViews();
 
-	void ReCreateSwapChain(GLFWwindow* window, VulkanCore* vulkanCore);
+	void ReCreateSwapChain(GLFWwindow* window);
 	
 	//Clean this Later
 	std::vector<VkFramebuffer>& GetSwapChainFrameBuffers();
@@ -38,7 +38,7 @@ public:
 	VkFormat& GetSwapChainImageFormat();
 	VkExtent2D& GetSwapChainImageExtent();
 	
-	void CleanUpSwapChain(VulkanCore* vulkanCore);
+	void CleanUpSwapChain();
 
 private:
 	

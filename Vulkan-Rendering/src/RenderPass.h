@@ -2,8 +2,6 @@
 
 #include "VulkanIncludes.h"
 
-class VulkanCore;
-
 class RenderPass
 {
 public:
@@ -11,9 +9,9 @@ public:
     RenderPass();
     ~RenderPass();
     
-    void CreateRenderPass(VulkanCore* vulkanCore);
+    void CreateRenderPass();
 
-    VkRenderPass GetRenderPass() const;
+    VkRenderPass GetVulkanRenderPass() const;
 private:
 
     VkRenderPass renderPass;

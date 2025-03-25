@@ -9,8 +9,6 @@ class DeviceQuery;
 class RenderPass;
 class CommandBuffer;
 
-class VulkanCore;
-
 //Replace into class later
 #include <glm/glm.hpp>
 #include <array>
@@ -66,28 +64,28 @@ public:
     Pipelines();
     ~Pipelines();
 
-    void CreateGraphicsPipeline(VulkanCore* vulkanCore);
+    void CreateGraphicsPipeline();
 
-    void CreateVertexBuffer(VulkanCore* vulkanCore);
-    void CreateIndexBuffer(VulkanCore* vulkanCore);
+    void CreateVertexBuffer();
+    void CreateIndexBuffer();
 
     VkPipelineLayout& GetPipelineLayout();
     VkPipeline& GetGraphicsPipeline();
     VkBuffer& GetVertexBuffer();
     VkBuffer& GetIndexBuffer();
 
-    void CleanUp(DeviceQuery& device) const;
+    void CleanUp() const;
 
 private:
 
-    static uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties, DeviceQuery& device);
+    static uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
-    void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory, DeviceQuery& device);
+    void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
-    void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size, CommandBuffer& commandBuf, DeviceQuery& device);
+    void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size, CommandBuffer& commandBuf);
     
     static std::vector<char> ReadFile(const std::string& fileName);
-    VkShaderModule CreateShaderModule(const std::vector<char>& code, DeviceQuery& deviceQury);
+    VkShaderModule CreateShaderModule(const std::vector<char>& code);
     
     VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;

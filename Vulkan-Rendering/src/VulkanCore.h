@@ -12,37 +12,67 @@ class VulkanInstance;
 class VulkanCore
 {
 public:
-    VulkanCore();
-    ~VulkanCore();
 
-    void SetDevice(DeviceQuery* device);
-    DeviceQuery* GetChosenDevice() const;
+    VulkanCore(const VulkanCore&) = delete;
+    
+    static VulkanCore& Get()
+    {
+        static VulkanCore s_Instance;
+        return s_Instance;
+    }
+    
+    static void SetDevice(DeviceQuery* device);
+    static DeviceQuery* GetChosenDevice();
 
-    void SetInstance(VulkanInstance* instance);
-    VulkanInstance* GetInstance() const;
+    static void SetInstance(VulkanInstance* instance);
+    static VulkanInstance* GetInstance();
 
-    void SetSurface(VulkanSurface* surface);
-    VulkanSurface* GetSurface() const;
+    static void SetSurface(VulkanSurface* surface);
+    static VulkanSurface* GetSurface();
 
-    void SetSwapChain(SwapChain* swapChain);
-    SwapChain* GetSwapChain() const;
+    static void SetSwapChain(SwapChain* swapChain);
+    static SwapChain* GetSwapChain();
 
-    void SetRenderPass(RenderPass* renderPass);
-    RenderPass* GetRenderPass() const;
+    static void SetRenderPass(RenderPass* renderPass);
+    static RenderPass* GetRenderPass();
 
-    void SetCommandBuffer(CommandBuffer* commandBuffer);
-    CommandBuffer* GetCommandBuffer();
+    static void SetCommandBuffer(CommandBuffer* commandBuffer);
+    static CommandBuffer* GetCommandBuffer();
 
-    void SetPipeline(Pipelines* pipeline);
-    Pipelines* GetPipeline();
+    static void SetPipeline(Pipelines* pipeline);
+    static Pipelines* GetPipeline();
     
 private:
 
-    DeviceQuery* VDevice;
-    VulkanInstance* VInstance;
-    VulkanSurface* VSurface;
-    SwapChain* VSwapChain;
-    RenderPass* VRenderPass;
-    CommandBuffer* VCommandBuffer;
-    Pipelines* VPipeline;
+    VulkanCore() = default;
+    ~VulkanCore();
+    
+    void ISetDevice(DeviceQuery* device);
+    DeviceQuery* IGetChosenDevice() const;
+
+    void ISetInstance(VulkanInstance* instance);
+    VulkanInstance* IGetInstance() const;
+
+    void ISetSurface(VulkanSurface* surface);
+    VulkanSurface* IGetSurface() const;
+
+    void ISetSwapChain(SwapChain* swapChain);
+    SwapChain* IGetSwapChain() const;
+
+    void ISetRenderPass(RenderPass* renderPass);
+    RenderPass* IGetRenderPass() const;
+
+    void ISetCommandBuffer(CommandBuffer* commandBuffer);
+    CommandBuffer* IGetCommandBuffer();
+
+    void ISetPipeline(Pipelines* pipeline);
+    Pipelines* IGetPipeline();
+    
+    DeviceQuery* VDevice = nullptr;
+    VulkanInstance* VInstance = nullptr;
+    VulkanSurface* VSurface = nullptr;
+    SwapChain* VSwapChain = nullptr;
+    RenderPass* VRenderPass = nullptr;
+    CommandBuffer* VCommandBuffer = nullptr;
+    Pipelines* VPipeline = nullptr;
 };

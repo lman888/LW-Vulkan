@@ -30,15 +30,15 @@ public:
     DeviceQuery();
     ~DeviceQuery();
 
-    void PickPhysicalDevice(VulkanCore* vulkanCore);
-    void CreateLogicalDevice(VulkanCore* vulkanCore);
+    void PickPhysicalDevice();
+    void CreateLogicalDevice();
     
     VkDevice& GetChosenGPUDevice();
     VkPhysicalDevice& GetPhysicalDevice();
     VkQueue& GetGraphicsQueue();
     VkQueue& GetPresentQueue();
 
-    QueueFamilyIndices FindQueueFamilies(VulkanCore* vulkanCore);
+    QueueFamilyIndices FindQueueFamilies() const;
 
 private:
 
@@ -48,6 +48,6 @@ private:
     VkPhysicalDevice physicalDevice;
     const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
-    bool IsDeviceSuitable(VkPhysicalDevice device, VulkanCore* vulkanCore);
+    bool IsDeviceSuitable(VkPhysicalDevice device);
     bool CheckDeviceExtensionSupport(VkPhysicalDevice device) const;
 };
