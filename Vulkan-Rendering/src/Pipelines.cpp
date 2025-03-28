@@ -1,7 +1,10 @@
 ﻿#include "Pipelines.h"
 
 #include <iostream>
+#include <chrono>
+#include "glm/gtc/matrix_transform.hpp"
 
+//Project Includes
 #include "CommandBuffer.h"
 #include "DeviceQuery.h"
 #include "RenderPass.h"
@@ -15,6 +18,28 @@ Pipelines::Pipelines()
 
 Pipelines::~Pipelines()
 {
+}
+
+void Pipelines::CreateDescriptorSetLayout()
+{
+    VkDescriptorSetLayoutBinding uboLayoutBinding{};
+    uboLayoutBinding.binding = 0;
+    uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    uboLayoutBinding.descriptorCount = 1;
+    uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    uboLayoutBinding.pImmutableSamplers = nullptr;
+
+    VkDescriptorSetLayoutCreateInfo layoutInfo{};
+    layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    layoutInfo.bindingCount = 1;
+    layoutInfo.pBindings = &uboLayoutBinding;
+
+    if (vkCreateDescriptorSetLayout(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), &layoutInfo, nullptr, &descriptorSetLayout) !=VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create Descriptor Set Layout!");
+    }
+
+
 }
 
 /*
@@ -150,8 +175,8 @@ void Pipelines::CreateGraphicsPipeline()
 
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = 0;
-    pipelineLayoutInfo.pSetLayouts = nullptr;
+    pipelineLayoutInfo.setLayoutCount = 1;
+    pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
     pipelineLayoutInfo.pushConstantRangeCount = 0;
     pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
@@ -230,6 +255,33 @@ void Pipelines::CreateIndexBuffer()
     
 }
 
+void Pipelines::CreateUniformBuffers()
+{
+    VkDeviceSize bufferSize = sizeof(UniformBufferObject);
+
+    uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+    uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
+    uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
+        CreateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
+
+        vkMapMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), uniformBuffersMemory[i], 0, bufferSize, 0, &uniformBuffersMapped[i]);
+    }
+}
+
+void Pipelines::UpdateUniformBuffer(uint32_t currentFrame)
+{
+    static auto startTime = std::chrono::high_resolution_clock::now();
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+    UniformBufferObject ubo{};
+    ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+}
+
 VkPipelineLayout& Pipelines::GetPipelineLayout()
 {
     return pipelineLayout;
@@ -260,6 +312,16 @@ void Pipelines::CleanUp() const
     
     vkDestroyPipeline(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), graphicsPipeline, nullptr);
     vkDestroyPipelineLayout(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), pipelineLayout, nullptr);
+
+    vkDestroyDescriptorSetLayout(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), descriptorSetLayout, nullptr);
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
+        vkDestroyBuffer(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), uniformBuffers[i], nullptr);
+        vkFreeMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), uniformBuffersMemory[i], nullptr);
+    }
+
+    vkDestroyDescriptorSetLayout(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), descriptorSetLayout, nullptr);
 }
 
 uint32_t Pipelines::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)

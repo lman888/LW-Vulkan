@@ -180,6 +180,8 @@ void CommandBuffer::DrawFrame(GLFWwindow* window)
 
     RecordCommandBuffer(imageIndex);
 
+    VulkanCore::GetPipeline()->UpdateUniformBuffer(currentFrame);
+
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 

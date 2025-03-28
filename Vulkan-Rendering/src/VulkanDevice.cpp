@@ -83,6 +83,7 @@ void VulkanDevice::InitVulkan()
     VulkanCore::GetSwapChain()->CreateImageViews();
 
     VulkanCore::GetRenderPass()->CreateRenderPass();
+    VulkanCore::GetPipeline()->CreateDescriptorSetLayout();
     VulkanCore::GetPipeline()->CreateGraphicsPipeline();
     
     VulkanCore::GetSwapChain()->CreateFrameBuffers();
@@ -90,6 +91,7 @@ void VulkanDevice::InitVulkan()
     VulkanCore::GetCommandBuffer()->CreateCommandPool();
 
     VulkanCore::GetPipeline()->CreateVertexBuffer();
+    VulkanCore::GetPipeline()->CreateIndexBuffer();
     VulkanCore::GetPipeline()->CreateIndexBuffer();
     VulkanCore::GetCommandBuffer()->CreateCommandBuffers();
     VulkanCore::GetCommandBuffer()->CreateSyncObjects();

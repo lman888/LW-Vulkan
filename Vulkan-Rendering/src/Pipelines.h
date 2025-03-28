@@ -58,16 +58,28 @@ const std::vector<uint16_t> indices =
     0, 1, 2, 2, 3, 0
 };
 
+struct UniformBufferObject
+{
+    glm::mat4 model;
+    glm::mat4 view;
+    glm::mat4 proj;
+};
+
 class Pipelines
 {
 public:
     Pipelines();
     ~Pipelines();
 
+    //Need to move into a Shader Class
+    void CreateDescriptorSetLayout();
+
     void CreateGraphicsPipeline();
 
     void CreateVertexBuffer();
     void CreateIndexBuffer();
+    void CreateUniformBuffers();
+    void UpdateUniformBuffer(uint32_t currentFrame);
 
     VkPipelineLayout& GetPipelineLayout();
     VkPipeline& GetGraphicsPipeline();
@@ -87,10 +99,16 @@ private:
     static std::vector<char> ReadFile(const std::string& fileName);
     VkShaderModule CreateShaderModule(const std::vector<char>& code);
     
+    VkDescriptorSetLayout descriptorSetLayout;
     VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
     VkBuffer indexBuffer;
     VkDeviceMemory indexBufferMemory;
+
+    std::vector<VkBuffer> uniformBuffers;
+    std::vector<VkDeviceMemory> uniformBuffersMemory;
+    std::vector<void*> uniformBuffersMapped;
+
 };

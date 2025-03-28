@@ -10,6 +10,10 @@ class RenderPass;
 class SwapChain;
 class Pipelines;
 
+//We choose 2 so the CPU does not get too far ahead of the GPU.
+//Do this better in future.
+const int MAX_FRAMES_IN_FLIGHT = 2;
+
 class CommandBuffer
 {
 public:
@@ -38,8 +42,6 @@ private:
     VkCommandPool commandPool;
     std::vector<VkCommandBuffer> commandBuffers;
 
-    //We choose 2 so the CPU does not get too far ahead of the GPU.
-    const int MAX_FRAMES_IN_FLIGHT = 2;
     
     int currentFrame = 0;
 
