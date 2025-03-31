@@ -5,7 +5,6 @@
 #include "DeviceQuery.h"
 #include "Pipelines.h"
 #include "RenderPass.h"
-#include "VulkanSurface.h"
 #include "SwapChain.h"
 #include "VulkanCore.h"
 
@@ -103,6 +102,8 @@ void CommandBuffer::RecordCommandBuffer(uint32_t imageIndex)
     scissor.offset = {0, 0};
     scissor.extent = VulkanCore::GetSwapChain()->GetSwapChainImageExtent();
     vkCmdSetScissor(commandBuffers[currentFrame], 0, 1, &scissor);
+
+    vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, VulkanCore::GetPipeline()->GetPipelineLayout(), 0, 1, &VulkanCore::GetPipeline()->GetDescriptorSets()[currentFrame], 0, nullptr);
     
     vkCmdDrawIndexed(commandBuffers[currentFrame], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
     
@@ -175,12 +176,12 @@ void CommandBuffer::DrawFrame(GLFWwindow* window)
         throw std::runtime_error("Failed to acquire Swap Chain Image!");
     }
     
+    VulkanCore::GetPipeline()->UpdateUniformBuffer(currentFrame);
+    
     vkResetFences(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), 1, &inFlightFences[currentFrame]);
     vkResetCommandBuffer(commandBuffers[currentFrame], 0);
 
     RecordCommandBuffer(imageIndex);
-
-    VulkanCore::GetPipeline()->UpdateUniformBuffer(currentFrame);
 
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;

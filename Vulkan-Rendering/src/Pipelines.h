@@ -10,6 +10,8 @@ class RenderPass;
 class CommandBuffer;
 
 //Replace into class later
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #include <glm/glm.hpp>
 #include <array>
 
@@ -60,9 +62,9 @@ const std::vector<uint16_t> indices =
 
 struct UniformBufferObject
 {
-    glm::mat4 model;
-    glm::mat4 view;
-    glm::mat4 proj;
+    alignas(16) glm::mat4 model;
+    alignas(16) glm::mat4 view;
+    alignas(16) glm::mat4 proj;
 };
 
 class Pipelines
@@ -79,12 +81,15 @@ public:
     void CreateVertexBuffer();
     void CreateIndexBuffer();
     void CreateUniformBuffers();
-    void UpdateUniformBuffer(uint32_t currentFrame);
+    void UpdateUniformBuffer(uint32_t currentFrame) const;
+    void CreateDescriptorPool();
+    void CreateDescriptorSets();
 
     VkPipelineLayout& GetPipelineLayout();
     VkPipeline& GetGraphicsPipeline();
     VkBuffer& GetVertexBuffer();
     VkBuffer& GetIndexBuffer();
+    std::vector<VkDescriptorSet>& GetDescriptorSets();
 
     void CleanUp() const;
 
@@ -107,6 +112,8 @@ private:
     VkBuffer indexBuffer;
     VkDeviceMemory indexBufferMemory;
 
+    VkDescriptorPool descriptorPool;
+    std::vector<VkDescriptorSet> descriptorSets;
     std::vector<VkBuffer> uniformBuffers;
     std::vector<VkDeviceMemory> uniformBuffersMemory;
     std::vector<void*> uniformBuffersMapped;

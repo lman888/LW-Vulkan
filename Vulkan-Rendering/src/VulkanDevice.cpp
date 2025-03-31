@@ -92,7 +92,9 @@ void VulkanDevice::InitVulkan()
 
     VulkanCore::GetPipeline()->CreateVertexBuffer();
     VulkanCore::GetPipeline()->CreateIndexBuffer();
-    VulkanCore::GetPipeline()->CreateIndexBuffer();
+    VulkanCore::GetPipeline()->CreateUniformBuffers();
+    VulkanCore::GetPipeline()->CreateDescriptorPool();
+    VulkanCore::GetPipeline()->CreateDescriptorSets();
     VulkanCore::GetCommandBuffer()->CreateCommandBuffers();
     VulkanCore::GetCommandBuffer()->CreateSyncObjects();
 }

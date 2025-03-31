@@ -8,6 +8,7 @@
 #include "CommandBuffer.h"
 #include "DeviceQuery.h"
 #include "RenderPass.h"
+#include "SwapChain.h"
 #include "VulkanCore.h"
 
 Pipelines::Pipelines()
@@ -137,11 +138,12 @@ void Pipelines::CreateGraphicsPipeline()
     rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth = 1.0f;
     rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-    rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+    rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterizer.depthBiasEnable = VK_FALSE;
     rasterizer.depthBiasClamp = 0.0f; //Optional
     rasterizer.depthBiasConstantFactor = 0.0f; //Optional
     rasterizer.depthBiasSlopeFactor = 0.0f; //Optional
+    rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
     
     VkPipelineMultisampleStateCreateInfo multiSampling{};
     multiSampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -248,6 +250,7 @@ void Pipelines::CreateIndexBuffer()
 
     CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
 
+    
     CopyBuffer(stagingBuffer, indexBuffer, bufferSize, *VulkanCore::GetCommandBuffer());
 
     vkDestroyBuffer(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), stagingBuffer, nullptr);
@@ -271,15 +274,78 @@ void Pipelines::CreateUniformBuffers()
     }
 }
 
-void Pipelines::UpdateUniformBuffer(uint32_t currentFrame)
+void Pipelines::UpdateUniformBuffer(uint32_t currentFrame) const
 {
     static auto startTime = std::chrono::high_resolution_clock::now();
+
     auto currentTime = std::chrono::high_resolution_clock::now();
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
     UniformBufferObject ubo{};
     ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.proj = glm::perspective(glm::radians(45.0f), VulkanCore::GetSwapChain()->GetSwapChainImageExtent().width / (float) VulkanCore::GetSwapChain()->GetSwapChainImageExtent().height, 0.1f, 10.0f);
+    ubo.proj[1][1] *= -1;
 
+    memcpy(uniformBuffersMapped[currentFrame], &ubo, sizeof(ubo));
+}
+
+void Pipelines::CreateDescriptorPool()
+{
+    VkDescriptorPoolSize poolSize{};
+    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    poolSize.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+    VkDescriptorPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    poolInfo.poolSizeCount = 1;
+    poolInfo.pPoolSizes = &poolSize;
+    poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    poolInfo.flags = 0;
+
+    if (vkCreateDescriptorPool(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to Create a Descriptor Pool.");
+    }
+}
+
+void Pipelines::CreateDescriptorSets()
+{
+    std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, descriptorSetLayout);
+    
+    VkDescriptorSetAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocInfo.descriptorPool = descriptorPool;
+    allocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    allocInfo.pSetLayouts = layouts.data();
+
+    descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+
+    if (vkAllocateDescriptorSets(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), &allocInfo, descriptorSets.data()) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to allocate Descriptor Sets!");
+    }
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
+        VkDescriptorBufferInfo bufferInfo{};
+        bufferInfo.buffer = uniformBuffers[i];
+        bufferInfo.offset = 0;
+        bufferInfo.range = sizeof(UniformBufferObject);
+        
+        VkWriteDescriptorSet descriptionWrite{};
+        descriptionWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptionWrite.dstSet = descriptorSets[i];
+        descriptionWrite.dstBinding = 0;
+        descriptionWrite.dstArrayElement = 0;
+        descriptionWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptionWrite.descriptorCount = 1;
+        descriptionWrite.pBufferInfo = &bufferInfo;
+        descriptionWrite.pImageInfo = nullptr;
+        descriptionWrite.pTexelBufferView = nullptr;
+
+        vkUpdateDescriptorSets(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), 1, &descriptionWrite, 0, nullptr);
+    }
 }
 
 VkPipelineLayout& Pipelines::GetPipelineLayout()
@@ -302,6 +368,11 @@ VkBuffer& Pipelines::GetIndexBuffer()
     return indexBuffer;
 }
 
+std::vector<VkDescriptorSet>& Pipelines::GetDescriptorSets()
+{
+    return descriptorSets;
+}
+
 void Pipelines::CleanUp() const
 {
     vkDestroyBuffer(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), vertexBuffer, nullptr);
@@ -315,13 +386,14 @@ void Pipelines::CleanUp() const
 
     vkDestroyDescriptorSetLayout(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), descriptorSetLayout, nullptr);
 
+    vkDestroyDescriptorPool(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), descriptorPool, nullptr);
+    
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
         vkDestroyBuffer(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), uniformBuffers[i], nullptr);
         vkFreeMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), uniformBuffersMemory[i], nullptr);
     }
-
-    vkDestroyDescriptorSetLayout(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), descriptorSetLayout, nullptr);
+    
 }
 
 uint32_t Pipelines::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
