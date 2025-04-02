@@ -17,7 +17,7 @@ class CommandBuffer;
 
 struct Vertex
 {
-    glm::vec2 pos;
+    glm::vec3 pos;
     glm::vec3 color;
 
     static VkVertexInputBindingDescription GetBindingDescription()
@@ -35,7 +35,7 @@ struct Vertex
         std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
         attributeDescriptions[0].binding = 0;
         attributeDescriptions[0].location = 0;
-        attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+        attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT; // Changed to support Vec 3 position input
         attributeDescriptions[0].offset = offsetof(Vertex, pos);
 
         attributeDescriptions[1].binding = 0;
@@ -49,15 +49,26 @@ struct Vertex
 
 const std::vector<Vertex> vertices =
 {
-    {{-0.5f, -0.5f},{1.0f, 0.0f, 0.0f}},
-    {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{0.5f ,0.5f}, {0.0f, 0.0f, 1.0f}},
-    {{-0.5f ,0.5f}, {1.0f, 1.0f, 1.0f}}
+    //Front Face
+    {{-0.5f, -0.5f, 0.5f},{1.0f, 0.0f, 0.0f}},
+    {{0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{0.5f ,0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+    {{-0.5f ,0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}},
+
+    {{-0.5f, -0.5f, -0.5f},{1.0f, 0.0f, 1.0f}},
+    {{0.5f, -0.5f, -0.5f},{0.0f, 1.0f, 1.0f}},
+    {{0.5f ,0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}},
+    {{-0.5f ,0.5f, -0.5f}, {0.0f, 0.0f, 0.0f}},
 };
 
 const std::vector<uint16_t> indices =
 {
-    0, 1, 2, 2, 3, 0
+    0, 1, 2, 2, 3, 0, //Front
+    4, 5, 6, 6, 7, 4, //Back
+    0, 4, 7, 7, 3, 0, //Left
+    1, 5, 6, 6, 2, 1,  // Right
+    3, 2, 6, 6, 7, 3,  // Top
+    0, 1, 5, 5, 4, 0   // Bottom
 };
 
 struct UniformBufferObject
