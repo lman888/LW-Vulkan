@@ -89,7 +89,7 @@ void VulkanDevice::InitVulkan()
     VulkanCore::GetSwapChain()->CreateFrameBuffers();
 
     VulkanCore::GetCommandBuffer()->CreateCommandPool();
-
+    VulkanCore::GetPipeline()->CreateTextureImage();
     VulkanCore::GetPipeline()->CreateVertexBuffer();
     VulkanCore::GetPipeline()->CreateIndexBuffer();
     VulkanCore::GetPipeline()->CreateUniformBuffers();

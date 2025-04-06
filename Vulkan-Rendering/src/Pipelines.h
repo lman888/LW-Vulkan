@@ -95,6 +95,7 @@ public:
     void UpdateUniformBuffer(uint32_t currentFrame) const;
     void CreateDescriptorPool();
     void CreateDescriptorSets();
+    void CreateTextureImage();
 
     VkPipelineLayout& GetPipelineLayout();
     VkPipeline& GetGraphicsPipeline();
@@ -111,6 +112,8 @@ private:
     void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
     void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size, CommandBuffer& commandBuf);
+
+    void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
     
     static std::vector<char> ReadFile(const std::string& fileName);
     VkShaderModule CreateShaderModule(const std::vector<char>& code);
@@ -122,6 +125,8 @@ private:
     VkDeviceMemory vertexBufferMemory;
     VkBuffer indexBuffer;
     VkDeviceMemory indexBufferMemory;
+    VkImage textureImage;
+    VkDeviceMemory textureImageMemory;
 
     VkDescriptorPool descriptorPool;
     std::vector<VkDescriptorSet> descriptorSets;
