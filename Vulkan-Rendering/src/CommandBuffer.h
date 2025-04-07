@@ -32,6 +32,10 @@ public:
 
     void DrawFrame(GLFWwindow* window);
 
+    VkCommandBuffer BeginSingleTimeCommands();
+
+    void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
+
     VkCommandBuffer &GetCommandBuffer();
     VkCommandPool& GetCommandPool();
 
