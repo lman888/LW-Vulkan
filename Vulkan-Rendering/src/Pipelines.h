@@ -19,6 +19,7 @@ struct Vertex
 {
     glm::vec3 pos;
     glm::vec3 color;
+    glm::vec2 texCoord;
 
     static VkVertexInputBindingDescription GetBindingDescription()
     {
@@ -30,9 +31,9 @@ struct Vertex
         return bindingDescription;
     }
 
-    static std::array<VkVertexInputAttributeDescription, 2> GetAttributeDescriptions()
+    static std::array<VkVertexInputAttributeDescription, 3> GetAttributeDescriptions()
     {
-        std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
+        std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
         attributeDescriptions[0].binding = 0;
         attributeDescriptions[0].location = 0;
         attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT; // Changed to support Vec 3 position input
@@ -42,6 +43,11 @@ struct Vertex
         attributeDescriptions[1].location = 1;
         attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
         attributeDescriptions[1].offset = offsetof(Vertex, color);
+
+        attributeDescriptions[2].binding = 0;
+        attributeDescriptions[2].location = 2;
+        attributeDescriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
         
         return attributeDescriptions;
     }
@@ -50,15 +56,15 @@ struct Vertex
 const std::vector<Vertex> vertices =
 {
     //Front Face
-    {{-0.5f, -0.5f, 0.5f},{1.0f, 0.0f, 0.0f}},
-    {{0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{0.5f ,0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-    {{-0.5f ,0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}},
+    {{-0.5f, -0.5f, 0.5f},{1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+    {{0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
+    {{0.5f ,0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+    {{-0.5f ,0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
 
-    {{-0.5f, -0.5f, -0.5f},{1.0f, 0.0f, 1.0f}},
-    {{0.5f, -0.5f, -0.5f},{0.0f, 1.0f, 1.0f}},
-    {{0.5f ,0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}},
-    {{-0.5f ,0.5f, -0.5f}, {0.0f, 0.0f, 0.0f}},
+    {{-0.5f, -0.5f, -0.5f},{1.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+    {{0.5f, -0.5f, -0.5f},{0.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
+    {{0.5f ,0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
+    { {-0.5f ,0.5f, -0.5f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}
 };
 
 const std::vector<uint16_t> indices =
@@ -96,6 +102,10 @@ public:
     void CreateDescriptorPool();
     void CreateDescriptorSets();
     void CreateTextureImage();
+    void CreateTextureImageView();
+    void CreateTextureSampler();
+    
+    VkImageView CreateImageView(VkImage image, VkFormat format); 
 
     VkPipelineLayout& GetPipelineLayout();
     VkPipeline& GetGraphicsPipeline();
@@ -118,6 +128,7 @@ private:
     void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 
     void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+
     
     static std::vector<char> ReadFile(const std::string& fileName);
     VkShaderModule CreateShaderModule(const std::vector<char>& code);
@@ -131,6 +142,8 @@ private:
     VkDeviceMemory indexBufferMemory;
     VkImage textureImage;
     VkDeviceMemory textureImageMemory;
+    VkImageView textureImageView;
+    VkSampler textureSampler;
 
     VkDescriptorPool descriptorPool;
     std::vector<VkDescriptorSet> descriptorSets;

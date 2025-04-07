@@ -90,6 +90,8 @@ void VulkanDevice::InitVulkan()
 
     VulkanCore::GetCommandBuffer()->CreateCommandPool();
     VulkanCore::GetPipeline()->CreateTextureImage();
+    VulkanCore::GetPipeline()->CreateTextureImageView();
+    VulkanCore::GetPipeline()->CreateTextureSampler();
     VulkanCore::GetPipeline()->CreateVertexBuffer();
     VulkanCore::GetPipeline()->CreateIndexBuffer();
     VulkanCore::GetPipeline()->CreateUniformBuffers();

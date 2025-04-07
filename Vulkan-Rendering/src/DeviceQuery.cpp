@@ -79,6 +79,7 @@ void DeviceQuery::CreateLogicalDevice()
     }
 
     VkPhysicalDeviceFeatures deviceFeatures{};
+    deviceFeatures.samplerAnisotropy = VK_TRUE;
     
     VkDeviceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -172,8 +173,11 @@ bool DeviceQuery::IsDeviceSuitable(VkPhysicalDevice device)
         SwapChainSupportDetails swapChainSupport = VulkanCore::GetSwapChain()->QuerySwapChainSupport();
         swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
     }
+
+    VkPhysicalDeviceFeatures supportedFeatures;
+    vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
     
-    return indices.IsComplete() && extensionsSupported && swapChainAdequate;
+    return indices.IsComplete() && extensionsSupported && swapChainAdequate && supportedFeatures.samplerAnisotropy;
 }
 
 bool DeviceQuery::CheckDeviceExtensionSupport(VkPhysicalDevice device) const

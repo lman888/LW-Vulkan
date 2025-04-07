@@ -3,6 +3,8 @@
 #include <iostream>
 #include <chrono>
 #include "glm/gtc/matrix_transform.hpp"
+
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 //Project Includes
@@ -11,7 +13,6 @@
 #include "RenderPass.h"
 #include "SwapChain.h"
 #include "VulkanCore.h"
-#include "VulkanDevice.h"
 
 Pipelines::Pipelines()
 {
@@ -32,10 +33,19 @@ void Pipelines::CreateDescriptorSetLayout()
     uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     uboLayoutBinding.pImmutableSamplers = nullptr;
 
+    VkDescriptorSetLayoutBinding samplerLayoutBinding {};
+    samplerLayoutBinding.binding = 1;
+    samplerLayoutBinding.descriptorCount = 1;
+    samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    samplerLayoutBinding.pImmutableSamplers = nullptr;
+    samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    std::array<VkDescriptorSetLayoutBinding, 2> bindings {uboLayoutBinding, samplerLayoutBinding};
+    
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layoutInfo.bindingCount = 1;
-    layoutInfo.pBindings = &uboLayoutBinding;
+    layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
+    layoutInfo.pBindings = bindings.data();
 
     if (vkCreateDescriptorSetLayout(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), &layoutInfo, nullptr, &descriptorSetLayout) !=VK_SUCCESS)
     {
@@ -112,7 +122,7 @@ void Pipelines::CreateGraphicsPipeline()
     dynamicState.pDynamicStates = dynamicStates.data();
     
     VkVertexInputBindingDescription bindingDescription = Vertex::GetBindingDescription();
-    std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions = Vertex::GetAttributeDescriptions();
+    std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions = Vertex::GetAttributeDescriptions();
     
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -292,14 +302,16 @@ void Pipelines::UpdateUniformBuffer(uint32_t currentFrame) const
 
 void Pipelines::CreateDescriptorPool()
 {
-    VkDescriptorPoolSize poolSize{};
-    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    poolSize.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
-
+    std::array<VkDescriptorPoolSize, 2> poolSizes{};
+    poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    poolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    poolSizes[1].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    
     VkDescriptorPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    poolInfo.poolSizeCount = 1;
-    poolInfo.pPoolSizes = &poolSize;
+    poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+    poolInfo.pPoolSizes = poolSizes.data();
     poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
     poolInfo.flags = 0;
 
@@ -332,19 +344,30 @@ void Pipelines::CreateDescriptorSets()
         bufferInfo.buffer = uniformBuffers[i];
         bufferInfo.offset = 0;
         bufferInfo.range = sizeof(UniformBufferObject);
-        
-        VkWriteDescriptorSet descriptionWrite{};
-        descriptionWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        descriptionWrite.dstSet = descriptorSets[i];
-        descriptionWrite.dstBinding = 0;
-        descriptionWrite.dstArrayElement = 0;
-        descriptionWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-        descriptionWrite.descriptorCount = 1;
-        descriptionWrite.pBufferInfo = &bufferInfo;
-        descriptionWrite.pImageInfo = nullptr;
-        descriptionWrite.pTexelBufferView = nullptr;
 
-        vkUpdateDescriptorSets(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), 1, &descriptionWrite, 0, nullptr);
+        VkDescriptorImageInfo imageInfo{};
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.imageView = textureImageView;
+        imageInfo.sampler = textureSampler;
+        
+        std::array<VkWriteDescriptorSet, 2> descriptionWrites{};
+        descriptionWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptionWrites[0].dstSet = descriptorSets[i];
+        descriptionWrites[0].dstBinding = 0;
+        descriptionWrites[0].dstArrayElement = 0;
+        descriptionWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptionWrites[0].descriptorCount = 1;
+        descriptionWrites[0].pBufferInfo = &bufferInfo;
+        
+        descriptionWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptionWrites[1].dstSet = descriptorSets[i];
+        descriptionWrites[1].dstBinding = 1;
+        descriptionWrites[1].dstArrayElement = 0;
+        descriptionWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        descriptionWrites[1].descriptorCount = 1;
+        descriptionWrites[1].pImageInfo = &imageInfo;
+
+        vkUpdateDescriptorSets(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), static_cast<uint32_t>(descriptionWrites.size()), descriptionWrites.data(), 0, nullptr);
     }
 }
 
@@ -376,6 +399,77 @@ void Pipelines::CreateTextureImage()
     stbi_image_free(pixels);
     
     CreateImage(textureWidth, textureHeight, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
+
+    TransitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+    CopyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(textureWidth), static_cast<uint32_t>(textureHeight));
+
+    TransitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+    vkDestroyBuffer(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), stagingBuffer, nullptr);
+
+    vkFreeMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), stagingBufferMemory, nullptr);
+}
+
+void Pipelines::CreateTextureImageView()
+{
+    textureImageView = CreateImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+}
+
+void Pipelines::CreateTextureSampler()
+{
+    VkSamplerCreateInfo samplerInfo {};
+    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    samplerInfo.magFilter = VK_FILTER_LINEAR;
+    samplerInfo.minFilter = VK_FILTER_LINEAR;
+
+    samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+
+    VkPhysicalDeviceProperties properties{};
+    vkGetPhysicalDeviceProperties(VulkanCore::GetChosenDevice()->GetPhysicalDevice(), &properties);
+    
+    samplerInfo.anisotropyEnable = VK_TRUE;
+    samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
+
+    samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+    samplerInfo.unnormalizedCoordinates = VK_FALSE;
+
+    samplerInfo.compareEnable = VK_FALSE;
+    samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+
+    samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+    samplerInfo.mipLodBias = 0.0f;
+    samplerInfo.minLod = 0.0f;
+    samplerInfo.maxLod = 0.0f;
+
+    if (vkCreateSampler(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create Texture Sampler!");
+    }
+}
+
+VkImageView Pipelines::CreateImageView(VkImage image, VkFormat format)
+{
+    VkImageViewCreateInfo viewInfo{};
+    viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    viewInfo.image = image;
+    viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    viewInfo.format = format;
+    viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    viewInfo.subresourceRange.baseMipLevel = 0;
+    viewInfo.subresourceRange.levelCount = 1;
+    viewInfo.subresourceRange.baseArrayLayer = 0;
+    viewInfo.subresourceRange.layerCount = 1;
+
+    VkImageView imageView;
+    if (vkCreateImageView(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), &viewInfo, nullptr, &imageView) != VK_SUCCESS)
+    {
+        throw std::runtime_error("Failed to create Texture Image View!");
+    }
+
+    return imageView;
 }
 
 VkPipelineLayout& Pipelines::GetPipelineLayout()
@@ -405,6 +499,12 @@ std::vector<VkDescriptorSet>& Pipelines::GetDescriptorSets()
 
 void Pipelines::CleanUp() const
 {
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
+        vkDestroyBuffer(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), uniformBuffers[i], nullptr);
+        vkFreeMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), uniformBuffersMemory[i], nullptr);
+    }
+    
     vkDestroyBuffer(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), vertexBuffer, nullptr);
     vkFreeMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), vertexBufferMemory, nullptr);
 
@@ -413,17 +513,17 @@ void Pipelines::CleanUp() const
     
     vkDestroyPipeline(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), graphicsPipeline, nullptr);
     vkDestroyPipelineLayout(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), pipelineLayout, nullptr);
+    
+    vkDestroyDescriptorPool(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), descriptorPool, nullptr);
+
+    vkDestroySampler(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), textureSampler, nullptr);
+    
+    vkDestroyImageView(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), textureImageView, nullptr);
+    
+    vkDestroyImage(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), textureImage, nullptr);
+    vkFreeMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), textureImageMemory, nullptr);
 
     vkDestroyDescriptorSetLayout(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), descriptorSetLayout, nullptr);
-
-    vkDestroyDescriptorPool(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), descriptorPool, nullptr);
-    
-    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
-    {
-        vkDestroyBuffer(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), uniformBuffers[i], nullptr);
-        vkFreeMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), uniformBuffersMemory[i], nullptr);
-    }
-    
 }
 
 uint32_t Pipelines::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
@@ -577,8 +677,32 @@ void Pipelines::TransitionImageLayout(VkImage image, VkFormat format, VkImageLay
     barrier.srcAccessMask = 0; //TODO
     barrier.dstAccessMask = 0; //TODO
 
-    vkCmdPipelineBarrier(commandBuffer, 0, 0, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+    VkPipelineStageFlags sourceStage;
+    VkPipelineStageFlags destinationStage;
 
+    if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
+    {
+        barrier.srcAccessMask = 0;
+        barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+        sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+        destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    }
+    else if(oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+    {
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+        sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    }
+    else
+    {
+        throw std::runtime_error("Unsupported Layout Transition!");
+    }
+
+    vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+    
     VulkanCore::GetCommandBuffer()->EndSingleTimeCommands(commandBuffer);
 }
 
