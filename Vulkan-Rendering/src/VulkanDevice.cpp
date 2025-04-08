@@ -86,9 +86,10 @@ void VulkanDevice::InitVulkan()
     VulkanCore::GetPipeline()->CreateDescriptorSetLayout();
     VulkanCore::GetPipeline()->CreateGraphicsPipeline();
     
-    VulkanCore::GetSwapChain()->CreateFrameBuffers();
 
     VulkanCore::GetCommandBuffer()->CreateCommandPool();
+    VulkanCore::GetPipeline()->CreateDepthResource();
+    VulkanCore::GetSwapChain()->CreateFrameBuffers();
     VulkanCore::GetPipeline()->CreateTextureImage();
     VulkanCore::GetPipeline()->CreateTextureImageView();
     VulkanCore::GetPipeline()->CreateTextureSampler();

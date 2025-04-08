@@ -40,6 +40,12 @@ public:
 
     QueueFamilyIndices FindQueueFamilies() const;
 
+    VkFormat FindSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+
+    VkFormat FindDepthFormat();
+
+    bool HasStencilComponent(VkFormat format);
+    
 private:
 
     VkQueue graphicsQueue;

@@ -11,7 +11,7 @@ class CommandBuffer;
 
 //Replace into class later
 #define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <array>
 
@@ -46,7 +46,7 @@ struct Vertex
 
         attributeDescriptions[2].binding = 0;
         attributeDescriptions[2].location = 2;
-        attributeDescriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
         attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
         
         return attributeDescriptions;
@@ -55,26 +55,21 @@ struct Vertex
 
 const std::vector<Vertex> vertices =
 {
-    //Front Face
-    {{-0.5f, -0.5f, 0.5f},{1.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
-    {{0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f}},
-    {{0.5f ,0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-    {{-0.5f ,0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
+    {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+    {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+    {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+    {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
 
-    {{-0.5f, -0.5f, -0.5f},{1.0f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-    {{0.5f, -0.5f, -0.5f},{0.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
-    {{0.5f ,0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
-    { {-0.5f ,0.5f, -0.5f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}}
+    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+    {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
+    {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
+    {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
 };
 
 const std::vector<uint16_t> indices =
 {
-    0, 1, 2, 2, 3, 0, //Front
-    4, 5, 6, 6, 7, 4, //Back
-    0, 4, 7, 7, 3, 0, //Left
-    1, 5, 6, 6, 2, 1,  // Right
-    3, 2, 6, 6, 7, 3,  // Top
-    0, 1, 5, 5, 4, 0   // Bottom
+    0, 1, 2, 2, 3, 0,
+    4, 5, 6, 6, 7, 4
 };
 
 struct UniformBufferObject
@@ -104,13 +99,17 @@ public:
     void CreateTextureImage();
     void CreateTextureImageView();
     void CreateTextureSampler();
+    void CreateDepthResource();
     
-    VkImageView CreateImageView(VkImage image, VkFormat format); 
+    VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags flags); 
 
     VkPipelineLayout& GetPipelineLayout();
     VkPipeline& GetGraphicsPipeline();
     VkBuffer& GetVertexBuffer();
     VkBuffer& GetIndexBuffer();
+    VkImageView& GetImageView();
+    VkImage& GetImage();
+    VkDeviceMemory& GetImageMemory();
     std::vector<VkDescriptorSet>& GetDescriptorSets();
 
     void CleanUp() const;
@@ -144,6 +143,9 @@ private:
     VkDeviceMemory textureImageMemory;
     VkImageView textureImageView;
     VkSampler textureSampler;
+    VkImage depthImage;
+    VkDeviceMemory depthImageMemory;
+    VkImageView depthImageView;
 
     VkDescriptorPool descriptorPool;
     std::vector<VkDescriptorSet> descriptorSets;
