@@ -93,6 +93,7 @@ void VulkanDevice::InitVulkan()
     VulkanCore::GetPipeline()->CreateTextureImage();
     VulkanCore::GetPipeline()->CreateTextureImageView();
     VulkanCore::GetPipeline()->CreateTextureSampler();
+    VulkanCore::GetPipeline()->LoadModel("models/Viking House/viking_room.obj");
     VulkanCore::GetPipeline()->CreateVertexBuffer();
     VulkanCore::GetPipeline()->CreateIndexBuffer();
     VulkanCore::GetPipeline()->CreateUniformBuffers();

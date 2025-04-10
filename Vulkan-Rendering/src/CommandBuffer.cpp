@@ -90,7 +90,7 @@ void CommandBuffer::RecordCommandBuffer(uint32_t imageIndex)
     VkBuffer vertexBuffers[] = { VulkanCore::GetPipeline()->GetVertexBuffer() };
     VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
-    vkCmdBindIndexBuffer(commandBuffers[currentFrame], VulkanCore::GetPipeline()->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT16);
+    vkCmdBindIndexBuffer(commandBuffers[currentFrame], VulkanCore::GetPipeline()->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
     
     VkViewport viewPort{};
     viewPort.x = 0.0f;
@@ -108,7 +108,7 @@ void CommandBuffer::RecordCommandBuffer(uint32_t imageIndex)
 
     vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, VulkanCore::GetPipeline()->GetPipelineLayout(), 0, 1, &VulkanCore::GetPipeline()->GetDescriptorSets()[currentFrame], 0, nullptr);
     
-    vkCmdDrawIndexed(commandBuffers[currentFrame], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+    vkCmdDrawIndexed(commandBuffers[currentFrame], static_cast<uint32_t>(VulkanCore::GetPipeline()->GetIndices().size()), 1, 0, 0, 0);
     
     vkCmdEndRenderPass(commandBuffers[currentFrame]);
 

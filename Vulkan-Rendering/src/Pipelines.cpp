@@ -7,6 +7,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
+
 //Project Includes
 #include "CommandBuffer.h"
 #include "DeviceQuery.h"
@@ -388,9 +391,9 @@ void Pipelines::CreateTextureImage()
     int textureWidth = 0;
     int textureHeight = 0;
     int textureChannels = 0;
-
-    stbi_uc* pixels = stbi_load("textures/N64.jpg", &textureWidth, &textureHeight, &textureChannels, STBI_rgb_alpha);
-
+    
+    stbi_uc* pixels = stbi_load(texturePath.c_str(), &textureWidth, &textureHeight, &textureChannels, STBI_rgb_alpha);
+    
     VkDeviceSize imageSize = textureWidth * textureHeight * 4;
 
     if (!pixels)
@@ -470,6 +473,46 @@ void Pipelines::CreateDepthResource()
     TransitionImageLayout(depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 }
 
+void Pipelines::LoadModel(std::string modelPath)
+{
+    tinyobj::attrib_t attrib;
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> materials;
+    std::string warn, err;
+
+    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, modelPath.c_str()))
+    {
+        throw std::runtime_error(warn + err);
+    }
+
+    for (const tinyobj::shape_t& shape : shapes)
+    {
+        for (const auto& index : shape.mesh.indices)
+        {
+            Vertex vertex{};
+
+
+            vertex.pos =
+            {
+                attrib.vertices[3 * index.vertex_index + 0],
+                attrib.vertices[3 * index.vertex_index + 1],
+                attrib.vertices[3 * index.vertex_index + 2]
+            };
+
+            vertex.texCoord =
+            {
+                attrib.texcoords[2 * index.texcoord_index + 0],
+                1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
+            };
+
+            vertex.color = {1.0f, 1.0f, 1.0f};
+            
+            vertices.push_back(vertex);
+            indices.push_back(indices.size());
+        }
+    }
+}
+
 VkImageView Pipelines::CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags flags)
 {
     VkImageViewCreateInfo viewInfo{};
@@ -490,6 +533,11 @@ VkImageView Pipelines::CreateImageView(VkImage image, VkFormat format, VkImageAs
     }
 
     return imageView;
+}
+
+const std::vector<uint32_t>& Pipelines::GetIndices() const
+{
+    return indices;
 }
 
 VkPipelineLayout& Pipelines::GetPipelineLayout()

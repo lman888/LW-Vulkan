@@ -53,25 +53,6 @@ struct Vertex
     }
 };
 
-const std::vector<Vertex> vertices =
-{
-    {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-    {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-    {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-    {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-
-    {{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-    {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-    {{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-    {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
-};
-
-const std::vector<uint16_t> indices =
-{
-    0, 1, 2, 2, 3, 0,
-    4, 5, 6, 6, 7, 4
-};
-
 struct UniformBufferObject
 {
     alignas(16) glm::mat4 model;
@@ -87,9 +68,7 @@ public:
 
     //Need to move into a Shader Class
     void CreateDescriptorSetLayout();
-
     void CreateGraphicsPipeline();
-
     void CreateVertexBuffer();
     void CreateIndexBuffer();
     void CreateUniformBuffers();
@@ -100,9 +79,12 @@ public:
     void CreateTextureImageView();
     void CreateTextureSampler();
     void CreateDepthResource();
+
+    void LoadModel(std::string modelPath);
     
     VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags flags); 
 
+    const std::vector<uint32_t>& GetIndices() const;
     VkPipelineLayout& GetPipelineLayout();
     VkPipeline& GetGraphicsPipeline();
     VkBuffer& GetVertexBuffer();
@@ -135,6 +117,8 @@ private:
     VkDescriptorSetLayout descriptorSetLayout;
     VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;
+    std::vector<Vertex> vertices;
+    std::vector<uint32_t> indices;
     VkBuffer vertexBuffer;
     VkDeviceMemory vertexBufferMemory;
     VkBuffer indexBuffer;
@@ -147,10 +131,11 @@ private:
     VkDeviceMemory depthImageMemory;
     VkImageView depthImageView;
 
+    const std::string texturePath = "models/Viking House/viking_room.png";
+    
     VkDescriptorPool descriptorPool;
     std::vector<VkDescriptorSet> descriptorSets;
     std::vector<VkBuffer> uniformBuffers;
     std::vector<VkDeviceMemory> uniformBuffersMemory;
     std::vector<void*> uniformBuffersMapped;
-
 };
