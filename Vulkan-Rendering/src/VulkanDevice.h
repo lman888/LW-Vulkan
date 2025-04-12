@@ -33,4 +33,5 @@ private:
     SwapChain* VSwapChain;
     RenderPass* VRenderPass;
     Pipelines* VPipeline;
+    Camera* VCamera;
 };

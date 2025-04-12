@@ -30,6 +30,8 @@ public:
 	void CreateImageViews();
 
 	void ReCreateSwapChain(GLFWwindow* window);
+
+	float ExtentAspectRatio() const;
 	
 	//Clean this Later
 	std::vector<VkFramebuffer>& GetSwapChainFrameBuffers();

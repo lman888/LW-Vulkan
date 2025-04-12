@@ -12,6 +12,8 @@ class CommandBuffer;
 //Replace into class later
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
 #include <glm/glm.hpp>
 #include <array>
 
@@ -51,7 +53,21 @@ struct Vertex
         
         return attributeDescriptions;
     }
+
+    bool operator==(const Vertex& other) const
+    {
+        return pos == other.pos && color == other.color && texCoord == other.texCoord;
+    }
 };
+
+namespace std 
+{
+    template<> struct hash<Vertex> {
+        size_t operator()(Vertex const& vertex) const {
+            return ((hash<glm::vec3>()(vertex.pos) ^ (hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^ (hash<glm::vec2>()(vertex.texCoord) << 1);
+        }
+    };
+}
 
 struct UniformBufferObject
 {
@@ -75,14 +91,14 @@ public:
     void UpdateUniformBuffer(uint32_t currentFrame) const;
     void CreateDescriptorPool();
     void CreateDescriptorSets();
-    void CreateTextureImage();
+    void CreateTextureImage(const std::string texture);
     void CreateTextureImageView();
     void CreateTextureSampler();
     void CreateDepthResource();
 
     void LoadModel(std::string modelPath);
     
-    VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags flags); 
+    VkImageView CreateImageView(VkImage& image, VkFormat format, VkImageAspectFlags flags); 
 
     const std::vector<uint32_t>& GetIndices() const;
     VkPipelineLayout& GetPipelineLayout();
@@ -102,14 +118,13 @@ private:
 
     void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
-    void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+    void CopyBuffer(VkBuffer& srcBuffer, VkBuffer& dstBuffer, VkDeviceSize size);
 
     void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 
-    void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+    void TransitionImageLayout(VkImage& image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 
-    void CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
-
+    void CopyBufferToImage(VkBuffer& buffer, VkImage& image, uint32_t width, uint32_t height);
     
     static std::vector<char> ReadFile(const std::string& fileName);
     VkShaderModule CreateShaderModule(const std::vector<char>& code);
@@ -130,8 +145,6 @@ private:
     VkImage depthImage;
     VkDeviceMemory depthImageMemory;
     VkImageView depthImageView;
-
-    const std::string texturePath = "models/Viking House/viking_room.png";
     
     VkDescriptorPool descriptorPool;
     std::vector<VkDescriptorSet> descriptorSets;

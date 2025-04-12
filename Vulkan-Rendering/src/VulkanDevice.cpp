@@ -7,6 +7,7 @@
 #include "RenderPass.h"
 #include "Pipelines.h"
 #include "CommandBuffer.h"
+#include "Camera.h"
 
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
@@ -23,6 +24,7 @@ VulkanDevice::VulkanDevice()
     VRenderPass = new RenderPass();
     VCommandBuffer = new CommandBuffer();
     VPipeline = new Pipelines();
+    VCamera = new Camera();
 }
 
 VulkanDevice::~VulkanDevice()
@@ -54,8 +56,7 @@ void VulkanDevice::InitWindow()
     glfwInit();
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
+    
     window = glfwCreateWindow(WIDTH, HEIGHT, "LW - Vulkan Renderer", nullptr, nullptr);
     glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
@@ -70,6 +71,7 @@ void VulkanDevice::InitVulkan()
     VulkanCore::SetRenderPass(VRenderPass);
     VulkanCore::SetPipeline(VPipeline);
     VulkanCore::SetCommandBuffer(VCommandBuffer);
+    VulkanCore::SetCamera(VCamera);
     
     VulkanCore::GetInstance()->CreateVulkanInstance();
     VulkanCore::GetInstance()->SetupDebugMessenger();
@@ -85,12 +87,11 @@ void VulkanDevice::InitVulkan()
     VulkanCore::GetRenderPass()->CreateRenderPass();
     VulkanCore::GetPipeline()->CreateDescriptorSetLayout();
     VulkanCore::GetPipeline()->CreateGraphicsPipeline();
-    
 
     VulkanCore::GetCommandBuffer()->CreateCommandPool();
     VulkanCore::GetPipeline()->CreateDepthResource();
     VulkanCore::GetSwapChain()->CreateFrameBuffers();
-    VulkanCore::GetPipeline()->CreateTextureImage();
+    VulkanCore::GetPipeline()->CreateTextureImage("models/Viking House/viking_room.png");
     VulkanCore::GetPipeline()->CreateTextureImageView();
     VulkanCore::GetPipeline()->CreateTextureSampler();
     VulkanCore::GetPipeline()->LoadModel("models/Viking House/viking_room.obj");

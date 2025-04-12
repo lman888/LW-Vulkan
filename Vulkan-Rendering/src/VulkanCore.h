@@ -7,6 +7,7 @@ class SwapChain;
 class VulkanSurface;
 class DeviceQuery;
 class VulkanInstance;
+class Camera;
 
 //This will hold pointers to all major Vulkan Objects
 class VulkanCore
@@ -41,6 +42,9 @@ public:
 
     static void SetPipeline(Pipelines* pipeline);
     static Pipelines* GetPipeline();
+
+    static void SetCamera(Camera* camera);
+    static Camera* GetCamera();
     
 private:
 
@@ -67,6 +71,9 @@ private:
 
     void ISetPipeline(Pipelines* pipeline);
     Pipelines* IGetPipeline();
+
+    void ISetCamera(Camera* camera);
+    Camera* IGetCamera();
     
     DeviceQuery* VDevice = nullptr;
     VulkanInstance* VInstance = nullptr;
@@ -75,4 +82,5 @@ private:
     RenderPass* VRenderPass = nullptr;
     CommandBuffer* VCommandBuffer = nullptr;
     Pipelines* VPipeline = nullptr;
+    Camera* VCamera = nullptr;
 };

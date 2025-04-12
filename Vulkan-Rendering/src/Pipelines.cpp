@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <chrono>
+#include <unordered_map>
 #include "glm/gtc/matrix_transform.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -156,7 +157,6 @@ void Pipelines::CreateGraphicsPipeline()
     rasterizer.depthBiasClamp = 0.0f; //Optional
     rasterizer.depthBiasConstantFactor = 0.0f; //Optional
     rasterizer.depthBiasSlopeFactor = 0.0f; //Optional
-    rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
     
     VkPipelineMultisampleStateCreateInfo multiSampling{};
     multiSampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
@@ -174,14 +174,14 @@ void Pipelines::CreateGraphicsPipeline()
     depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
     depthStencil.depthBoundsTestEnable = VK_FALSE;
     depthStencil.minDepthBounds = 0.0f;
-    depthStencil.maxDepthBounds = 0.0f;
+    depthStencil.maxDepthBounds = 1.0f;
     depthStencil.stencilTestEnable = VK_FALSE;
     depthStencil.front = {};
     depthStencil.back = {};
     
     VkPipelineColorBlendAttachmentState colorBlendAttachment{};
     colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    colorBlendAttachment.blendEnable = VK_TRUE;
+    colorBlendAttachment.blendEnable = VK_FALSE;
     colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
     colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
     colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD;
@@ -307,11 +307,11 @@ void Pipelines::UpdateUniformBuffer(uint32_t currentFrame) const
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
     UniformBufferObject ubo{};
-    ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.model = glm::rotate(glm::mat4(1.0f), (time / 10.0f) * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    ubo.proj = glm::perspective(glm::radians(45.0f), VulkanCore::GetSwapChain()->GetSwapChainImageExtent().width / (float) VulkanCore::GetSwapChain()->GetSwapChainImageExtent().height, 0.1f, 10.0f);
+    ubo.proj = glm::perspective(glm::radians(45.0f), VulkanCore::GetSwapChain()->GetSwapChainImageExtent().width / (float) VulkanCore::GetSwapChain()->GetSwapChainImageExtent().height, 0.1f, 1000.0f);
     ubo.proj[1][1] *= -1;
-
+    
     memcpy(uniformBuffersMapped[currentFrame], &ubo, sizeof(ubo));
 }
 
@@ -386,13 +386,13 @@ void Pipelines::CreateDescriptorSets()
     }
 }
 
-void Pipelines::CreateTextureImage()
+void Pipelines::CreateTextureImage(const std::string texture)
 {
     int textureWidth = 0;
     int textureHeight = 0;
     int textureChannels = 0;
     
-    stbi_uc* pixels = stbi_load(texturePath.c_str(), &textureWidth, &textureHeight, &textureChannels, STBI_rgb_alpha);
+    stbi_uc* pixels = stbi_load(texture.c_str(), &textureWidth, &textureHeight, &textureChannels, STBI_rgb_alpha);
     
     VkDeviceSize imageSize = textureWidth * textureHeight * 4;
 
@@ -469,8 +469,6 @@ void Pipelines::CreateDepthResource()
                 depthImageMemory);
 
     depthImageView = CreateImageView(depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
-
-    TransitionImageLayout(depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 }
 
 void Pipelines::LoadModel(std::string modelPath)
@@ -485,35 +483,36 @@ void Pipelines::LoadModel(std::string modelPath)
         throw std::runtime_error(warn + err);
     }
 
-    for (const tinyobj::shape_t& shape : shapes)
-    {
-        for (const auto& index : shape.mesh.indices)
-        {
+    std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+
+    for (const auto& shape : shapes) {
+        for (const auto& index : shape.mesh.indices) {
             Vertex vertex{};
 
-
-            vertex.pos =
-            {
+            vertex.pos = {
                 attrib.vertices[3 * index.vertex_index + 0],
                 attrib.vertices[3 * index.vertex_index + 1],
                 attrib.vertices[3 * index.vertex_index + 2]
             };
 
-            vertex.texCoord =
-            {
+            vertex.texCoord = {
                 attrib.texcoords[2 * index.texcoord_index + 0],
                 1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
             };
 
             vertex.color = {1.0f, 1.0f, 1.0f};
-            
-            vertices.push_back(vertex);
-            indices.push_back(indices.size());
+
+            if (uniqueVertices.count(vertex) == 0) {
+                uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
+                vertices.push_back(vertex);
+            }
+
+            indices.push_back(uniqueVertices[vertex]);
         }
     }
 }
 
-VkImageView Pipelines::CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags flags)
+VkImageView Pipelines::CreateImageView(VkImage& image, VkFormat format, VkImageAspectFlags flags)
 {
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -690,7 +689,7 @@ void Pipelines::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemo
     vkBindBufferMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), buffer, bufferMemory, 0);
 }
 
-void Pipelines::CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
+void Pipelines::CopyBuffer(VkBuffer& srcBuffer, VkBuffer& dstBuffer, VkDeviceSize size)
 {
     VkCommandBuffer commandBuffer = VulkanCore::GetCommandBuffer()->BeginSingleTimeCommands();
 
@@ -741,7 +740,7 @@ void Pipelines::CreateImage(uint32_t width, uint32_t height, VkFormat format, Vk
     vkBindImageMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), image, imageMemory, 0);
 }
 
-void Pipelines::TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
+void Pipelines::TransitionImageLayout(VkImage& image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
 {
     VkCommandBuffer commandBuffer = VulkanCore::GetCommandBuffer()->BeginSingleTimeCommands();
 
@@ -809,7 +808,7 @@ void Pipelines::TransitionImageLayout(VkImage image, VkFormat format, VkImageLay
     VulkanCore::GetCommandBuffer()->EndSingleTimeCommands(commandBuffer);
 }
 
-void Pipelines::CopyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
+void Pipelines::CopyBufferToImage(VkBuffer& buffer, VkImage& image, uint32_t width, uint32_t height)
 {
     VkCommandBuffer commandBuffer = VulkanCore::GetCommandBuffer()->BeginSingleTimeCommands();
 

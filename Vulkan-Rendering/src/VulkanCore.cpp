@@ -1,5 +1,7 @@
 ﻿#include "VulkanCore.h"
 
+#include "Camera.h"
+
 VulkanCore::~VulkanCore()
 {
     VDevice = nullptr;
@@ -81,6 +83,16 @@ Pipelines* VulkanCore::GetPipeline()
     return Get().IGetPipeline();
 }
 
+void VulkanCore::SetCamera(Camera* camera)
+{
+    Get().ISetCamera(camera);
+}
+
+Camera* VulkanCore::GetCamera()
+{
+    return Get().IGetCamera();
+}
+
 void VulkanCore::ISetDevice(DeviceQuery* device)
 {
     VDevice = device;
@@ -149,4 +161,14 @@ void VulkanCore::ISetPipeline(Pipelines* pipeline)
 Pipelines* VulkanCore::IGetPipeline()
 {
     return VPipeline;
+}
+
+void VulkanCore::ISetCamera(Camera* camera)
+{
+    VCamera = camera;
+}
+
+Camera* VulkanCore::IGetCamera()
+{
+    return VCamera;
 }

@@ -197,6 +197,11 @@ void SwapChain::ReCreateSwapChain(GLFWwindow* window)
     CreateFrameBuffers();
 }
 
+float SwapChain::ExtentAspectRatio() const
+{
+    return static_cast<float>(swapChainExtent.width) / static_cast<float>(swapChainExtent.height);
+}
+
 std::vector<VkFramebuffer>& SwapChain::GetSwapChainFrameBuffers()
 {
     return swapChainFrameBuffers;

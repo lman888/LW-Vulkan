@@ -2,6 +2,7 @@
 
 #include <filesystem>
 
+#include "Camera.h"
 #include "DeviceQuery.h"
 #include "Pipelines.h"
 #include "RenderPass.h"
