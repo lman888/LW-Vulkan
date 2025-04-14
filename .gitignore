@@ -1,58 +1,44 @@
-# Compiled binary files
+# Ignore everything in the Debug and Release folders
+**/Debug/
+**/Release/
+
+# Ignore object and binary files
+*.obj
 *.exe
-*.out
-*.app
-*.dylib
-*.so
-*.a
 *.dll
+*.lib
+*.pdb
+*.idb
+*.exp
 
-# Build artifacts
-/build/
-/bin/
-/obj/
-/CMakeFiles/
-CMakeCache.txt
-Makefile
-*.o
-*.lo
-*.la
-*.gch
-*.pch
+# Ignore logs
+*.log
+*.lastbuildstate
+*.tlog
+*.write
+*.recipe
+*.db
 
-# Visual Studio
-*.sln
-*.vcxproj*
-*.ncb
+# Ignore Visual Studio temporary files
+.vs/
+*.vcxproj.*
+*.sln.docstates
+*.user
+*.ipch
+*.suo
+*.cache
 *.sdf
 *.opensdf
-*.suo
-*.filters
-*.user
 
-# Xcode
-*.xcworkspace/
-*.xcuserstate
-*.xcuserdata/
-
-# Qt Creator
-*.pro.user
-*.pro.user.*
-*.moc
-
-# Unreal Engine
-*.uproject.user
-/Saved/
-/Intermediate/
-/.vs/
-
-# Code::Blocks
-*.layout
-
-# JetBrains IDEs
+# Ignore Rider
 .idea/
-*.iml
+cmake-build-*/
 
-# Other OS-specific files
+# Ignore OS files
 .DS_Store
 Thumbs.db
+Desktop.ini
+
+# Keep source files
+!*.cpp
+!*.h

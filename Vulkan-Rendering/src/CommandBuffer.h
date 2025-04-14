@@ -34,7 +34,7 @@ public:
 
     VkCommandBuffer BeginSingleTimeCommands();
 
-    void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
+    void EndSingleTimeCommands(VkCommandBuffer& commandBuffer);
 
     VkCommandBuffer &GetCommandBuffer();
     VkCommandPool& GetCommandPool();
