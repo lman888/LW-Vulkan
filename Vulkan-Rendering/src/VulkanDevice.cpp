@@ -91,7 +91,7 @@ void VulkanDevice::InitVulkan()
     VulkanCore::GetCommandBuffer()->CreateCommandPool();
     VulkanCore::GetPipeline()->CreateDepthResource();
     VulkanCore::GetSwapChain()->CreateFrameBuffers();
-    VulkanCore::GetPipeline()->CreateTextureImage("models/Viking House/viking_room.png");
+    VulkanCore::GetPipeline()->CreateTextureImage("textures/viking_room.png");
     VulkanCore::GetPipeline()->CreateTextureImageView();
     VulkanCore::GetPipeline()->CreateTextureSampler();
     VulkanCore::GetPipeline()->LoadModel("models/Viking House/viking_room.obj");
