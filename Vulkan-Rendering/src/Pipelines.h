@@ -98,7 +98,7 @@ public:
 
     void LoadModel(std::string modelPath);
     
-    VkImageView CreateImageView(VkImage& image, VkFormat format, VkImageAspectFlags flags, uint32_t mipLevels); 
+    VkImageView CreateImageView(VkImage& image, VkFormat format, VkImageAspectFlags flags); 
 
     const std::vector<uint32_t>& GetIndices() const;
     VkPipelineLayout& GetPipelineLayout();
@@ -107,9 +107,6 @@ public:
     VkBuffer& GetIndexBuffer();
     VkImageView& GetImageView();
     VkImage& GetImage();
-
-    //Fix this
-    uint32_t& GetMipLevels();
     VkDeviceMemory& GetImageMemory();
     std::vector<VkDescriptorSet>& GetDescriptorSets();
 
@@ -123,14 +120,11 @@ private:
 
     void CopyBuffer(VkBuffer& srcBuffer, VkBuffer& dstBuffer, VkDeviceSize size);
 
-    void CreateImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling,
-    VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+    void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 
-    void TransitionImageLayout(VkImage& image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
+    void TransitionImageLayout(VkImage& image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 
     void CopyBufferToImage(VkBuffer& buffer, VkImage& image, uint32_t width, uint32_t height);
-
-    void GenerateMipMaps(VkImage& image, VkFormat imageFormat, uint32_t texWidth, uint32_t texHeight, uint32_t mipLevels);
     
     static std::vector<char> ReadFile(const std::string& fileName);
     VkShaderModule CreateShaderModule(const std::vector<char>& code);
@@ -144,7 +138,6 @@ private:
     VkDeviceMemory vertexBufferMemory;
     VkBuffer indexBuffer;
     VkDeviceMemory indexBufferMemory;
-    uint32_t mipLevels;
     VkImage textureImage;
     VkDeviceMemory textureImageMemory;
     VkImageView textureImageView;

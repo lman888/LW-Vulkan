@@ -253,7 +253,7 @@ VkCommandBuffer CommandBuffer::BeginSingleTimeCommands()
     return commandBuffer;
 }
 
-void CommandBuffer::EndSingleTimeCommands(VkCommandBuffer& commandBuffer)
+void CommandBuffer::EndSingleTimeCommands(VkCommandBuffer commandBuffer)
 {
     vkEndCommandBuffer(commandBuffer);
 

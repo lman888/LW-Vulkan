@@ -1,44 +1,74 @@
-# Ignore everything in the Debug and Release folders
-**/Debug/
-**/Release/
+# === Compiled Object Files ===
+*.o
+*.lo
+*.slo
 
-# Ignore object and binary files
-*.obj
-*.exe
+# === Compiled Dynamic Libraries ===
+*.so
+*.dylib
 *.dll
-*.lib
+
+# === Compiled Static Libraries ===
+*.a
+
+# === Executables ===
+*.exe
+*.out
+*.app
+*.i
+*.ii
+*.s
+
+# === Build Directories ===
+build/
+bin/
+obj/
+out/
+Debug/
+Release/
+
+# === CMake Files ===
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# === Visual Studio Files ===
+*.sln
+*.vcxproj
+*.vcxproj.*
+*.user
+*.suo
+*.opensdf
+*.sdf
+*.cache
 *.pdb
 *.idb
-*.exp
-
-# Ignore logs
+*.ipch
+*.tlog
 *.log
 *.lastbuildstate
-*.tlog
-*.write
-*.recipe
-*.db
-
-# Ignore Visual Studio temporary files
 .vs/
-*.vcxproj.*
-*.sln.docstates
-*.user
-*.ipch
-*.suo
-*.cache
-*.sdf
-*.opensdf
 
-# Ignore Rider
+# === JetBrains Rider / CLion ===
 .idea/
 cmake-build-*/
 
-# Ignore OS files
+# === OS Files ===
+# macOS
 .DS_Store
+
+# Windows
 Thumbs.db
 Desktop.ini
 
-# Keep source files
-!*.cpp
-!*.h
+# === Editor / Tool Temp Files ===
+*.swp
+*.bak
+*.tmp
+*.lock
+
+# === Crash Logs / Misc ===
+*.dmp
+*.stackdump
