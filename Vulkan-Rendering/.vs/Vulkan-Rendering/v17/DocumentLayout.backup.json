@@ -3,24 +3,36 @@
   "WorkspaceRootPath": "C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\Pipelines.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\Pipelines.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\RenderPass.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\RenderPass.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\Pipelines.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\Pipelines.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\Pipelines.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\Pipelines.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\CommandBuffer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\CommandBuffer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\CommandBuffer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\CommandBuffer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\DeviceQuery.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\DeviceQuery.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\SwapChain.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\SwapChain.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\Pipelines.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\Pipelines.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\VulkanDevice.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\VulkanDevice.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\CommandBuffer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|solutionrelative:src\\CommandBuffer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{80803A59-E80B-4336-85C9-B34225B12D9D}|Vulkan-Rendering.vcxproj|C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\VulkanDevice.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -34,11 +46,46 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 2,
           "Children": [
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "DeviceQuery.cpp",
+              "DocumentMoniker": "C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\DeviceQuery.cpp",
+              "RelativeDocumentMoniker": "src\\DeviceQuery.cpp",
+              "ToolTip": "C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\DeviceQuery.cpp",
+              "RelativeToolTip": "src\\DeviceQuery.cpp",
+              "ViewState": "AgIAAJkAAAAAAAAAAAAYwKwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-04-14T03:54:59.582Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "SwapChain.cpp",
+              "DocumentMoniker": "C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\SwapChain.cpp",
+              "RelativeDocumentMoniker": "src\\SwapChain.cpp",
+              "ToolTip": "C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\SwapChain.cpp",
+              "RelativeToolTip": "src\\SwapChain.cpp",
+              "ViewState": "AgIAAF0AAAAAAAAAAAAtwHYAAABPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-04-14T00:36:02.373Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "RenderPass.cpp",
+              "DocumentMoniker": "C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\RenderPass.cpp",
+              "RelativeDocumentMoniker": "src\\RenderPass.cpp",
+              "ToolTip": "C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\RenderPass.cpp",
+              "RelativeToolTip": "src\\RenderPass.cpp",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAiwD0AAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-04-14T00:35:16.838Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -48,14 +95,14 @@
               "RelativeDocumentMoniker": "src\\CommandBuffer.cpp",
               "ToolTip": "C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\CommandBuffer.cpp",
               "RelativeToolTip": "src\\CommandBuffer.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAC8AAAAAAAAAAAAiwEgAAAAaAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-03-28T02:14:23.487Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 7,
               "Title": "CommandBuffer.h",
               "DocumentMoniker": "C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\CommandBuffer.h",
               "RelativeDocumentMoniker": "src\\CommandBuffer.h",
@@ -68,7 +115,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 8,
               "Title": "VulkanDevice.h",
               "DocumentMoniker": "C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\VulkanDevice.h",
               "RelativeDocumentMoniker": "src\\VulkanDevice.h",
@@ -80,38 +127,39 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 6,
               "Title": "VulkanDevice.cpp",
               "DocumentMoniker": "C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\VulkanDevice.cpp",
               "RelativeDocumentMoniker": "src\\VulkanDevice.cpp",
               "ToolTip": "C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\VulkanDevice.cpp",
               "RelativeToolTip": "src\\VulkanDevice.cpp",
-              "ViewState": "AgIAAEsAAAAAAAAAAAAAAGgAAAAxAAAAAAAAAA==",
+              "ViewState": "AgIAAEsAAAAAAAAAAAAiwGQAAAAfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-03-28T01:58:56.566Z"
+              "WhenOpened": "2025-03-28T01:58:56.566Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 5,
               "Title": "Pipelines.h",
               "DocumentMoniker": "C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\Pipelines.h",
               "RelativeDocumentMoniker": "src\\Pipelines.h",
               "ToolTip": "C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\Pipelines.h",
               "RelativeToolTip": "src\\Pipelines.h",
-              "ViewState": "AgIAAEsAAAAAAAAAAAAAAHcAAABaAAAAAAAAAA==",
+              "ViewState": "AgIAAEIAAAAAAAAAAAAiwFsAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2025-03-28T01:39:28.674Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Pipelines.cpp",
               "DocumentMoniker": "C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\Pipelines.cpp",
               "RelativeDocumentMoniker": "src\\Pipelines.cpp",
               "ToolTip": "C:\\Users\\liam.whitehouse\\Documents\\Repos\\V-Rendering\\LW-Vulkan\\Vulkan-Rendering\\src\\Pipelines.cpp",
               "RelativeToolTip": "src\\Pipelines.cpp",
-              "ViewState": "AgIAAE8BAAAAAAAAAAAEwGsBAAAFAAAAAAAAAA==",
+              "ViewState": "AgIAAJcAAAAAAAAAAAAiwLYAAAAYAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-03-28T01:39:27.212Z",
               "EditorCaption": ""
