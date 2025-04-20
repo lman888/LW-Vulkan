@@ -5,6 +5,8 @@
 //Project Files
 #include "VulkanCore.h"
 
+class ModelLoader;
+
 class VulkanDevice
 {
 public:
@@ -34,4 +36,7 @@ private:
     RenderPass* VRenderPass;
     Pipelines* VPipeline;
     Camera* VCamera;
+    VertexBuffer* VVertexBuffer;
+    
+    ModelLoader* CastleModel;
 };

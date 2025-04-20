@@ -8,6 +8,7 @@
 #include "Pipelines.h"
 #include "CommandBuffer.h"
 #include "Camera.h"
+#include "ModelLoader.h"
 
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
@@ -25,6 +26,8 @@ VulkanDevice::VulkanDevice()
     VCommandBuffer = new CommandBuffer();
     VPipeline = new Pipelines();
     VCamera = new Camera();
+    VVertexBuffer = new VertexBuffer();
+    CastleModel = new ModelLoader();
 }
 
 VulkanDevice::~VulkanDevice()
@@ -36,6 +39,8 @@ VulkanDevice::~VulkanDevice()
     VRenderPass = nullptr;
     VCommandBuffer = nullptr;
     VPipeline = nullptr;
+    VVertexBuffer = nullptr;
+    CastleModel = nullptr;
 }
 
 void VulkanDevice::RunApplication()
@@ -60,6 +65,7 @@ void VulkanDevice::InitWindow()
     window = glfwCreateWindow(WIDTH, HEIGHT, "LW - Vulkan Renderer", nullptr, nullptr);
     glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
+    glfwSetKeyCallback(window, KeyInputCallback);
 }
 
 void VulkanDevice::InitVulkan()
@@ -72,6 +78,7 @@ void VulkanDevice::InitVulkan()
     VulkanCore::SetPipeline(VPipeline);
     VulkanCore::SetCommandBuffer(VCommandBuffer);
     VulkanCore::SetCamera(VCamera);
+    VulkanCore::SetVertexBuffer(VVertexBuffer);
     
     VulkanCore::GetInstance()->CreateVulkanInstance();
     VulkanCore::GetInstance()->SetupDebugMessenger();
@@ -94,8 +101,9 @@ void VulkanDevice::InitVulkan()
     VulkanCore::GetPipeline()->CreateTextureImage("textures/viking_room.png");
     VulkanCore::GetPipeline()->CreateTextureImageView();
     VulkanCore::GetPipeline()->CreateTextureSampler();
-    VulkanCore::GetPipeline()->LoadModel("models/Viking House/viking_room.obj");
-    VulkanCore::GetPipeline()->CreateVertexBuffer();
+    
+    CastleModel->LoadModel("models/Castle/castle.obj");
+    VulkanCore::GetVertexBuffer()->CreateVertexBuffer();
     VulkanCore::GetPipeline()->CreateIndexBuffer();
     VulkanCore::GetPipeline()->CreateUniformBuffers();
     VulkanCore::GetPipeline()->CreateDescriptorPool();

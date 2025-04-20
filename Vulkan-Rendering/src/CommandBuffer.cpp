@@ -1,12 +1,15 @@
 ﻿#include "CommandBuffer.h"
 
 #include <filesystem>
+#include <array>
 
+//Project Includes
 #include "Camera.h"
 #include "DeviceQuery.h"
 #include "Pipelines.h"
 #include "RenderPass.h"
 #include "SwapChain.h"
+#include "VertexBuffer.h"
 #include "VulkanCore.h"
 
 CommandBuffer::CommandBuffer()
@@ -88,7 +91,7 @@ void CommandBuffer::RecordCommandBuffer(uint32_t imageIndex)
 
     vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, VulkanCore::GetPipeline()->GetGraphicsPipeline());
 
-    VkBuffer vertexBuffers[] = { VulkanCore::GetPipeline()->GetVertexBuffer() };
+    VkBuffer vertexBuffers[] = { VulkanCore::GetVertexBuffer()->GetVertexBuffer() };
     VkDeviceSize offsets[] = {0};
     vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
     vkCmdBindIndexBuffer(commandBuffers[currentFrame], VulkanCore::GetPipeline()->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);

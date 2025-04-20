@@ -2,7 +2,9 @@
 
 #include <iostream>
 #include <algorithm>
+#include <array>
 
+//Project Includes
 #include "DeviceQuery.h"
 #include "Pipelines.h"
 #include "VulkanSurface.h"

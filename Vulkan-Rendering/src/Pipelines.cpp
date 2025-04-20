@@ -3,6 +3,7 @@
 #include <iostream>
 #include <chrono>
 #include <unordered_map>
+#include <array>
 #include "glm/gtc/matrix_transform.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -12,11 +13,13 @@
 #include <tiny_obj_loader.h>
 
 //Project Includes
+#include "Camera.h"
 #include "CommandBuffer.h"
 #include "DeviceQuery.h"
 #include "RenderPass.h"
 #include "SwapChain.h"
 #include "VulkanCore.h"
+#include "VertexBuffer.h"
 
 Pipelines::Pipelines()
 {
@@ -239,44 +242,22 @@ void Pipelines::CreateGraphicsPipeline()
     vkDestroyShaderModule(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), vertShaderModule, nullptr);
 }
 
-void Pipelines::CreateVertexBuffer()
-{
-    VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
-
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingBufferMemory;
-    CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
-    
-    void* data;
-    vkMapMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
-    memcpy(data, vertices.data(), (size_t)bufferSize);
-    vkUnmapMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), stagingBufferMemory);
-    
-    CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
-
-    CopyBuffer(stagingBuffer, vertexBuffer, bufferSize);
-
-    vkDestroyBuffer(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), stagingBuffer, nullptr);
-    vkFreeMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), stagingBufferMemory, nullptr);
-}
-
 void Pipelines::CreateIndexBuffer()
 {
     VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
-    CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+    VulkanCore::GetVertexBuffer()->CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
     void* data;
     vkMapMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
     memcpy(data, indices.data(), (size_t)bufferSize);
     vkUnmapMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), stagingBufferMemory);
 
-    CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
-
+    VulkanCore::GetVertexBuffer()->CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
     
-    CopyBuffer(stagingBuffer, indexBuffer, bufferSize);
+    VulkanCore::GetVertexBuffer()->CopyBuffer(stagingBuffer, indexBuffer, bufferSize);
 
     vkDestroyBuffer(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), stagingBuffer, nullptr);
     vkFreeMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), stagingBufferMemory, nullptr);
@@ -293,7 +274,7 @@ void Pipelines::CreateUniformBuffers()
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
     {
-        CreateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
+        VulkanCore::GetVertexBuffer()->CreateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
 
         vkMapMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), uniformBuffersMemory[i], 0, bufferSize, 0, &uniformBuffersMapped[i]);
     }
@@ -307,9 +288,16 @@ void Pipelines::UpdateUniformBuffer(uint32_t currentFrame) const
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
     UniformBufferObject ubo{};
-    ubo.model = glm::rotate(glm::mat4(1.0f), (time / 10.0f) * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    ubo.proj = glm::perspective(glm::radians(45.0f), VulkanCore::GetSwapChain()->GetSwapChainImageExtent().width / (float) VulkanCore::GetSwapChain()->GetSwapChainImageExtent().height, 0.1f, 1000.0f);
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    model = glm::scale(model, glm::vec3(0.001f, 0.001f, 0.001f));
+
+    //Camera position will go into there
+    model = glm::translate(model, VulkanCore::GetCamera()->GetCameraPosition());
+    ubo.model = model;
+    
+    ubo.view = glm::lookAt(glm::vec3(10.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.proj = glm::perspective(glm::radians(45.0f), VulkanCore::GetSwapChain()->GetSwapChainImageExtent().width / (float) VulkanCore::GetSwapChain()->GetSwapChainImageExtent().height, 0.1f, 10000.0f);
     ubo.proj[1][1] *= -1;
     
     memcpy(uniformBuffersMapped[currentFrame], &ubo, sizeof(ubo));
@@ -405,8 +393,7 @@ void Pipelines::CreateTextureImage(const std::string texture)
 
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
-
-    CreateBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+    VulkanCore::GetVertexBuffer()->CreateBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
     void* data;
     vkMapMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), stagingBufferMemory, 0, imageSize, 0, &data);
@@ -420,7 +407,6 @@ void Pipelines::CreateTextureImage(const std::string texture)
 
     TransitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, GetMipLevels());
     CopyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(textureWidth), static_cast<uint32_t>(textureHeight));
-    //TransitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, GetMipLevels());
 
     vkDestroyBuffer(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), stagingBuffer, nullptr);
     vkFreeMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), stagingBufferMemory, nullptr);
@@ -473,44 +459,6 @@ void Pipelines::CreateDepthResource()
     depthImageView = CreateImageView(depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 }
 
-void Pipelines::LoadModel(std::string modelPath)
-{
-    tinyobj::attrib_t attrib;
-    std::vector<tinyobj::shape_t> shapes;
-    std::vector<tinyobj::material_t> materials;
-    std::string warn, err;
-
-    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, modelPath.c_str()))
-    {
-        throw std::runtime_error(warn + err);
-    }
-
-    std::unordered_map<Vertex, uint32_t> uniqueVertices{};
-
-    for (const auto& shape : shapes) {
-        for (const auto& index : shape.mesh.indices) {
-            Vertex vertex{};
-
-            vertex.pos = {
-                attrib.vertices[3 * index.vertex_index + 0],
-                attrib.vertices[3 * index.vertex_index + 1],
-                attrib.vertices[3 * index.vertex_index + 2]
-            };
-
-            vertex.texCoord = { attrib.texcoords[2 * index.texcoord_index + 0], 1.0f - attrib.texcoords[2 * index.texcoord_index + 1] };
-
-            vertex.color = {1.0f, 1.0f, 1.0f};
-
-            if (uniqueVertices.count(vertex) == 0) {
-                uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-                vertices.push_back(vertex);
-            }
-
-            indices.push_back(uniqueVertices[vertex]);
-        }
-    }
-}
-
 VkImageView Pipelines::CreateImageView(VkImage& image, VkFormat format, VkImageAspectFlags flags, uint32_t mipLevels)
 {
     VkImageViewCreateInfo viewInfo{};
@@ -533,7 +481,7 @@ VkImageView Pipelines::CreateImageView(VkImage& image, VkFormat format, VkImageA
     return imageView;
 }
 
-const std::vector<uint32_t>& Pipelines::GetIndices() const
+std::vector<uint32_t>& Pipelines::GetIndices()
 {
     return indices;
 }
@@ -546,11 +494,6 @@ VkPipelineLayout& Pipelines::GetPipelineLayout()
 VkPipeline& Pipelines::GetGraphicsPipeline()
 {
     return graphicsPipeline;
-}
-
-VkBuffer& Pipelines::GetVertexBuffer()
-{
-    return vertexBuffer;
 }
 
 VkBuffer& Pipelines::GetIndexBuffer()
@@ -590,9 +533,8 @@ void Pipelines::CleanUp() const
         vkDestroyBuffer(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), uniformBuffers[i], nullptr);
         vkFreeMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), uniformBuffersMemory[i], nullptr);
     }
-    
-    vkDestroyBuffer(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), vertexBuffer, nullptr);
-    vkFreeMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), vertexBufferMemory, nullptr);
+
+    VulkanCore::GetVertexBuffer()->CleanUp();
 
     vkDestroyBuffer(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), indexBuffer, nullptr);
     vkFreeMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), indexBufferMemory, nullptr);
@@ -610,21 +552,6 @@ void Pipelines::CleanUp() const
     vkFreeMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), textureImageMemory, nullptr);
 
     vkDestroyDescriptorSetLayout(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), descriptorSetLayout, nullptr);
-}
-
-uint32_t Pipelines::FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
-{
-    VkPhysicalDeviceMemoryProperties memProperties;
-    vkGetPhysicalDeviceMemoryProperties(VulkanCore::GetChosenDevice()->GetPhysicalDevice(), &memProperties);
-
-    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
-    {
-        if (typeFilter & (1 << i) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
-        {
-            return i;
-        }
-    }
-    throw std::runtime_error("Failed to find a suitable Memory Type!");
 }
 
 std::vector<char> Pipelines::ReadFile(const std::string& fileName)
@@ -663,48 +590,6 @@ VkShaderModule Pipelines::CreateShaderModule(const std::vector<char>& code)
     return shaderModule;
 }
 
-void Pipelines::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
-    VkBuffer& buffer, VkDeviceMemory& bufferMemory)
-{
-    VkBufferCreateInfo bufferInfo {};
-    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = size;
-    bufferInfo.usage = usage;
-    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-    if (vkCreateBuffer(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to Create Buffer!");
-    }
-
-    VkMemoryRequirements memRequirements;
-    vkGetBufferMemoryRequirements(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), buffer, &memRequirements);
-
-    VkMemoryAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, properties);
-
-    if (vkAllocateMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
-    {
-        throw std::runtime_error("Failed to Allocate Buffer!");
-    }
-
-    vkBindBufferMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), buffer, bufferMemory, 0);
-}
-
-void Pipelines::CopyBuffer(VkBuffer& srcBuffer, VkBuffer& dstBuffer, VkDeviceSize size)
-{
-    VkCommandBuffer commandBuffer = VulkanCore::GetCommandBuffer()->BeginSingleTimeCommands();
-
-    VkBufferCopy copyRegion{};
-    copyRegion.size = size;
-
-    vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
-
-    VulkanCore::GetCommandBuffer()->EndSingleTimeCommands(commandBuffer);
-}
-
 void Pipelines::CreateImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling,
     VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory)
 {
@@ -734,7 +619,7 @@ void Pipelines::CreateImage(uint32_t width, uint32_t height, uint32_t mipLevels,
     VkMemoryAllocateInfo allocInfo {};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = FindMemoryType(memRequirements.memoryTypeBits, properties);
+    allocInfo.memoryTypeIndex = VulkanCore::GetVertexBuffer()->FindMemoryType(memRequirements.memoryTypeBits, properties);
 
     if (vkAllocateMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), &allocInfo, nullptr, &imageMemory) != VK_SUCCESS)
     {

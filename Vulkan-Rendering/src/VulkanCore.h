@@ -8,6 +8,7 @@ class VulkanSurface;
 class DeviceQuery;
 class VulkanInstance;
 class Camera;
+class VertexBuffer;
 
 //This will hold pointers to all major Vulkan Objects
 class VulkanCore
@@ -45,6 +46,9 @@ public:
 
     static void SetCamera(Camera* camera);
     static Camera* GetCamera();
+
+    static void SetVertexBuffer(VertexBuffer* vertexBuffer);
+    static VertexBuffer* GetVertexBuffer();
     
 private:
 
@@ -74,6 +78,9 @@ private:
 
     void ISetCamera(Camera* camera);
     Camera* IGetCamera();
+
+    void ISetVertexBuffer(VertexBuffer* vertexBuffer);
+    VertexBuffer* IGetVertexBuffer();
     
     DeviceQuery* VDevice = nullptr;
     VulkanInstance* VInstance = nullptr;
@@ -83,4 +90,5 @@ private:
     CommandBuffer* VCommandBuffer = nullptr;
     Pipelines* VPipeline = nullptr;
     Camera* VCamera = nullptr;
+    VertexBuffer* VVertexBuffer = nullptr;
 };

@@ -93,6 +93,16 @@ Camera* VulkanCore::GetCamera()
     return Get().IGetCamera();
 }
 
+void VulkanCore::SetVertexBuffer(VertexBuffer* vertexBuffer)
+{
+    Get().ISetVertexBuffer(vertexBuffer);
+}
+
+VertexBuffer* VulkanCore::GetVertexBuffer()
+{
+    return Get().IGetVertexBuffer();
+}
+
 void VulkanCore::ISetDevice(DeviceQuery* device)
 {
     VDevice = device;
@@ -171,4 +181,14 @@ void VulkanCore::ISetCamera(Camera* camera)
 Camera* VulkanCore::IGetCamera()
 {
     return VCamera;
+}
+
+void VulkanCore::ISetVertexBuffer(VertexBuffer* vertexBuffer)
+{
+    VVertexBuffer = vertexBuffer;
+}
+
+VertexBuffer* VulkanCore::IGetVertexBuffer()
+{
+    return VVertexBuffer;
 }

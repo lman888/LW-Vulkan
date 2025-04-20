@@ -182,8 +182,10 @@
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\CommandBuffer.cpp" />
     <ClCompile Include="src\DeviceQuery.cpp" />
+    <ClCompile Include="src\ModelLoader.cpp" />
     <ClCompile Include="src\Pipelines.cpp" />
     <ClCompile Include="src\RenderPass.cpp" />
+    <ClCompile Include="src\VertexBuffer.cpp" />
     <ClCompile Include="src\Vulkan-Rendering.cpp" />
     <ClCompile Include="src\VulkanCore.cpp" />
     <ClCompile Include="src\VulkanDevice.cpp">
@@ -270,8 +272,10 @@
     <ClInclude Include="src\Camera.h" />
     <ClInclude Include="src\CommandBuffer.h" />
     <ClInclude Include="src\DeviceQuery.h" />
+    <ClInclude Include="src\ModelLoader.h" />
     <ClInclude Include="src\Pipelines.h" />
     <ClInclude Include="src\RenderPass.h" />
+    <ClInclude Include="src\VertexBuffer.h" />
     <ClInclude Include="src\VulkanCore.h" />
     <ClInclude Include="src\VulkanDevice.h" />
     <ClInclude Include="src\VulkanIncludes.h" />
