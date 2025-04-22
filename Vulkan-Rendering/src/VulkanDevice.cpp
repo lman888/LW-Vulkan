@@ -1,5 +1,6 @@
 ﻿#include "VulkanDevice.h"
 
+//Project Includes
 #include "DeviceQuery.h"
 #include "VulkanInstance.h"
 #include "VulkanSurface.h"
@@ -18,29 +19,33 @@ static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 
 VulkanDevice::VulkanDevice()
 {
-    VInstance = new VulkanInstance();
-    VSurface = new VulkanSurface();
-    VDeviceQuery = new DeviceQuery();
-    VSwapChain = new SwapChain();
-    VRenderPass = new RenderPass();
-    VCommandBuffer = new CommandBuffer();
-    VPipeline = new Pipelines();
-    VCamera = new Camera();
-    VVertexBuffer = new VertexBuffer();
-    CastleModel = new ModelLoader();
+    m_instance = new VulkanInstance();
+    m_surface = new VulkanSurface();
+    m_deviceQuery = new DeviceQuery();
+    m_swapChain = new SwapChain();
+    m_renderPass = new RenderPass();
+    m_commandBuffer = new CommandBuffer();
+    m_pipeline = new Pipelines();
+    m_camera = new Camera();
+    
+    m_castleModel = new ModelLoader();
+    m_models = new std::vector<ModelLoader>();
+    m_models->push_back(*m_castleModel);
+    
 }
 
 VulkanDevice::~VulkanDevice()
 {
-    VInstance = nullptr;
-    VSurface = nullptr;
-    VDeviceQuery = nullptr;
-    VSwapChain = nullptr;
-    VRenderPass = nullptr;
-    VCommandBuffer = nullptr;
-    VPipeline = nullptr;
-    VVertexBuffer = nullptr;
-    CastleModel = nullptr;
+    m_instance = nullptr;
+    m_surface = nullptr;
+    m_deviceQuery = nullptr;
+    m_swapChain = nullptr;
+    m_renderPass = nullptr;
+    m_commandBuffer = nullptr;
+    m_pipeline = nullptr;
+    m_camera = nullptr;
+    m_castleModel = nullptr;
+    m_models = nullptr;
 }
 
 void VulkanDevice::RunApplication()
@@ -68,17 +73,17 @@ void VulkanDevice::InitWindow()
     glfwSetKeyCallback(window, KeyInputCallback);
 }
 
-void VulkanDevice::InitVulkan()
+void VulkanDevice::InitVulkan() const
 {
-    VulkanCore::SetInstance(VInstance);
-    VulkanCore::SetSurface(VSurface);
-    VulkanCore::SetDevice(VDeviceQuery);
-    VulkanCore::SetSwapChain(VSwapChain);
-    VulkanCore::SetRenderPass(VRenderPass);
-    VulkanCore::SetPipeline(VPipeline);
-    VulkanCore::SetCommandBuffer(VCommandBuffer);
-    VulkanCore::SetCamera(VCamera);
-    VulkanCore::SetVertexBuffer(VVertexBuffer);
+    VulkanCore::SetInstance(m_instance);
+    VulkanCore::SetSurface(m_surface);
+    VulkanCore::SetDevice(m_deviceQuery);
+    VulkanCore::SetSwapChain(m_swapChain);
+    VulkanCore::SetRenderPass(m_renderPass);
+    VulkanCore::SetPipeline(m_pipeline);
+    VulkanCore::SetCommandBuffer(m_commandBuffer);
+    VulkanCore::SetCamera(m_camera);
+    VulkanCore::SetModels(m_models);
     
     VulkanCore::GetInstance()->CreateVulkanInstance();
     VulkanCore::GetInstance()->SetupDebugMessenger();
@@ -102,9 +107,9 @@ void VulkanDevice::InitVulkan()
     VulkanCore::GetPipeline()->CreateTextureImageView();
     VulkanCore::GetPipeline()->CreateTextureSampler();
     
-    CastleModel->LoadModel("models/Castle/castle.obj");
-    VulkanCore::GetVertexBuffer()->CreateVertexBuffer();
-    VulkanCore::GetPipeline()->CreateIndexBuffer();
+    m_castleModel->LoadModel("models/Castle/castle.obj");
+    m_castleModel->CreateModelBuffers();
+    
     VulkanCore::GetPipeline()->CreateUniformBuffers();
     VulkanCore::GetPipeline()->CreateDescriptorPool();
     VulkanCore::GetPipeline()->CreateDescriptorSets();

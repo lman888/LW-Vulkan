@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include <string>
-#include <vector>
 
 //Project Includes
-#include "VertexBuffer.h"
+class VertexBuffer;
+class IndexBuffer;
 
 class ModelLoader
 {
@@ -14,6 +14,19 @@ public:
 
     void LoadModel(const std::string modelPath);
 
+    void CreateModelBuffers() const;
+
+    void CleanUp();
+
+    VertexBuffer& GetModelVertex();
+    IndexBuffer& GetModelIndex();
+
 private:
+
+    void CreateModelVertexBuffer() const;
+
+    void CreateModelIndexBuffer() const;
     
+    VertexBuffer* m_modelVertex;
+    IndexBuffer* m_modelIndices;
 };

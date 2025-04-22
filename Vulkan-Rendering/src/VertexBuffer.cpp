@@ -1,8 +1,8 @@
 ﻿#include "VertexBuffer.h"
 
-//Project Includes
 #include <stdexcept>
 
+//Project Includes
 #include "VulkanCore.h"
 #include "DeviceQuery.h"
 #include "CommandBuffer.h"

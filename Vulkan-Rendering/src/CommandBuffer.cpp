@@ -6,6 +6,8 @@
 //Project Includes
 #include "Camera.h"
 #include "DeviceQuery.h"
+#include "IndexBuffer.h"
+#include "ModelLoader.h"
 #include "Pipelines.h"
 #include "RenderPass.h"
 #include "SwapChain.h"
@@ -91,35 +93,41 @@ void CommandBuffer::RecordCommandBuffer(uint32_t imageIndex)
 
     vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, VulkanCore::GetPipeline()->GetGraphicsPipeline());
 
-    VkBuffer vertexBuffers[] = { VulkanCore::GetVertexBuffer()->GetVertexBuffer() };
-    VkDeviceSize offsets[] = {0};
-    vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
-    vkCmdBindIndexBuffer(commandBuffers[currentFrame], VulkanCore::GetPipeline()->GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
-    
-    VkViewport viewPort{};
-    viewPort.x = 0.0f;
-    viewPort.y = 0.0f;
-    viewPort.width = (float)VulkanCore::GetSwapChain()->GetSwapChainImageExtent().width;
-    viewPort.height = (float)VulkanCore::GetSwapChain()->GetSwapChainImageExtent().height;
-    viewPort.minDepth = 0.0f;
-    viewPort.maxDepth = 1.0f;
-    vkCmdSetViewport(commandBuffers[currentFrame], 0, 1, &viewPort);
+    //Add in a loop that goes over all our Models we have loaded in
 
-    VkRect2D scissor{};
-    scissor.offset = {0, 0};
-    scissor.extent = VulkanCore::GetSwapChain()->GetSwapChainImageExtent();
-    vkCmdSetScissor(commandBuffers[currentFrame], 0, 1, &scissor);
-
-    vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, VulkanCore::GetPipeline()->GetPipelineLayout(), 0, 1, &VulkanCore::GetPipeline()->GetDescriptorSets()[currentFrame], 0, nullptr);
-    
-    vkCmdDrawIndexed(commandBuffers[currentFrame], static_cast<uint32_t>(VulkanCore::GetPipeline()->GetIndices().size()), 1, 0, 0, 0);
-    
-    vkCmdEndRenderPass(commandBuffers[currentFrame]);
-
-    if (vkEndCommandBuffer(commandBuffers[currentFrame]) != VK_SUCCESS)
+    for (ModelLoader& model : *VulkanCore::GetModels())
     {
-        throw std::runtime_error("Failed to Record Command Buffer!");
+        VkBuffer vertexBuffers[] = {model.GetModelVertex().GetVertexBuffer() };
+        VkDeviceSize offsets[] = {0};
+        vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
+        vkCmdBindIndexBuffer(commandBuffers[currentFrame], model.GetModelIndex().GetIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
+        
+        VkViewport viewPort{};
+        viewPort.x = 0.0f;
+        viewPort.y = 0.0f;
+        viewPort.width = (float)VulkanCore::GetSwapChain()->GetSwapChainImageExtent().width;
+        viewPort.height = (float)VulkanCore::GetSwapChain()->GetSwapChainImageExtent().height;
+        viewPort.minDepth = 0.0f;
+        viewPort.maxDepth = 1.0f;
+        vkCmdSetViewport(commandBuffers[currentFrame], 0, 1, &viewPort);
+
+        VkRect2D scissor{};
+        scissor.offset = {0, 0};
+        scissor.extent = VulkanCore::GetSwapChain()->GetSwapChainImageExtent();
+        vkCmdSetScissor(commandBuffers[currentFrame], 0, 1, &scissor);
+
+        vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, VulkanCore::GetPipeline()->GetPipelineLayout(), 0, 1, &VulkanCore::GetPipeline()->GetDescriptorSets()[currentFrame], 0, nullptr);
+        
+        vkCmdDrawIndexed(commandBuffers[currentFrame], static_cast<uint32_t>(model.GetModelIndex().GetIndices().size()), 1, 0, 0, 0);
+        
+        vkCmdEndRenderPass(commandBuffers[currentFrame]);
+
+        if (vkEndCommandBuffer(commandBuffers[currentFrame]) != VK_SUCCESS)
+        {
+            throw std::runtime_error("Failed to Record Command Buffer!");
+        }
     }
+    
 }
 
 void CommandBuffer::CreateSyncObjects()

@@ -1,5 +1,8 @@
 ﻿#pragma once
+#include <array>
+#include <vector>
 
+class ModelLoader;
 class Pipelines;
 class CommandBuffer;
 class RenderPass;
@@ -8,7 +11,6 @@ class VulkanSurface;
 class DeviceQuery;
 class VulkanInstance;
 class Camera;
-class VertexBuffer;
 
 //This will hold pointers to all major Vulkan Objects
 class VulkanCore
@@ -47,8 +49,8 @@ public:
     static void SetCamera(Camera* camera);
     static Camera* GetCamera();
 
-    static void SetVertexBuffer(VertexBuffer* vertexBuffer);
-    static VertexBuffer* GetVertexBuffer();
+    static void SetModels(std::vector<ModelLoader>* models);
+    static std::vector<ModelLoader>* GetModels();
     
 private:
 
@@ -71,16 +73,16 @@ private:
     RenderPass* IGetRenderPass() const;
 
     void ISetCommandBuffer(CommandBuffer* commandBuffer);
-    CommandBuffer* IGetCommandBuffer();
+    CommandBuffer* IGetCommandBuffer() const;
 
     void ISetPipeline(Pipelines* pipeline);
-    Pipelines* IGetPipeline();
+    Pipelines* IGetPipeline() const;
 
     void ISetCamera(Camera* camera);
-    Camera* IGetCamera();
+    Camera* IGetCamera() const;
 
-    void ISetVertexBuffer(VertexBuffer* vertexBuffer);
-    VertexBuffer* IGetVertexBuffer();
+    void ISetModels(std::vector<ModelLoader>* models);
+    std::vector<ModelLoader>* IGetModels() const;
     
     DeviceQuery* VDevice = nullptr;
     VulkanInstance* VInstance = nullptr;
@@ -90,5 +92,6 @@ private:
     CommandBuffer* VCommandBuffer = nullptr;
     Pipelines* VPipeline = nullptr;
     Camera* VCamera = nullptr;
-    VertexBuffer* VVertexBuffer = nullptr;
+
+    std::vector<ModelLoader>* m_models = nullptr;
 };

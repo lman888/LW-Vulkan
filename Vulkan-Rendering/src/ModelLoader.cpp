@@ -4,12 +4,14 @@
 #include <unordered_map>
 #include <tiny_obj_loader.h>
 
-#include "Pipelines.h"
-#include "VulkanCore.h"
+//Project Includes
+#include "IndexBuffer.h"
+#include "VertexBuffer.h"
 
 ModelLoader::ModelLoader()
 {
-
+    m_modelIndices = new IndexBuffer();
+    m_modelVertex = new VertexBuffer();
 }
 
 void ModelLoader::LoadModel(const std::string modelPath)
@@ -46,11 +48,46 @@ void ModelLoader::LoadModel(const std::string modelPath)
             vertex.color = {1.0f, 1.0f, 1.0f};
 
             if (uniqueVertices.count(vertex) == 0) {
-                uniqueVertices[vertex] = static_cast<uint32_t>(VulkanCore::GetVertexBuffer()->GetVertices().size());
-                VulkanCore::GetVertexBuffer()->GetVertices().push_back(vertex);
+                uniqueVertices[vertex] = static_cast<uint32_t>(GetModelVertex().GetVertices().size());
+                GetModelVertex().GetVertices().push_back(vertex);
             }
             
-            VulkanCore::GetPipeline()->GetIndices().push_back(uniqueVertices[vertex]);
+            GetModelIndex().GetIndices().push_back(uniqueVertices[vertex]);
         }
     }
+}
+
+void ModelLoader::CreateModelBuffers() const
+{
+    CreateModelVertexBuffer();
+    CreateModelIndexBuffer();
+}
+
+void ModelLoader::CleanUp()
+{
+    m_modelVertex->CleanUp();
+    m_modelIndices->CleanUp();
+
+    m_modelVertex = nullptr;
+    m_modelIndices = nullptr;
+}
+
+VertexBuffer& ModelLoader::GetModelVertex()
+{
+    return *m_modelVertex;
+}
+
+IndexBuffer& ModelLoader::GetModelIndex()
+{
+    return *m_modelIndices;
+}
+
+void ModelLoader::CreateModelVertexBuffer() const
+{
+    m_modelVertex->CreateVertexBuffer();
+}
+
+void ModelLoader::CreateModelIndexBuffer() const
+{
+    m_modelIndices->CreateIndexBuffer();
 }

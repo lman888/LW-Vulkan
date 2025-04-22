@@ -31,7 +31,6 @@ public:
     //Need to move into a Shader Class
     void CreateDescriptorSetLayout();
     void CreateGraphicsPipeline();
-    void CreateIndexBuffer();
     void CreateUniformBuffers();
     void UpdateUniformBuffer(uint32_t currentFrame) const;
     void CreateDescriptorPool();
@@ -42,11 +41,9 @@ public:
     void CreateDepthResource();
     
     VkImageView CreateImageView(VkImage& image, VkFormat format, VkImageAspectFlags flags, uint32_t mipLevels); 
-
-    std::vector<uint32_t>& GetIndices();
+    
     VkPipelineLayout& GetPipelineLayout();
     VkPipeline& GetGraphicsPipeline();
-    VkBuffer& GetIndexBuffer();
     VkImageView& GetImageView();
     VkImage& GetImage();
     VkDeviceMemory& GetImageMemory();
@@ -73,11 +70,7 @@ private:
     VkDescriptorSetLayout descriptorSetLayout;
     VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;
-    
-    std::vector<uint32_t> indices;
-    
-    VkBuffer indexBuffer;
-    VkDeviceMemory indexBufferMemory;
+
     uint32_t mipLevels;
     VkImage textureImage;
     VkDeviceMemory textureImageMemory;

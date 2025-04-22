@@ -1,7 +1,5 @@
 ﻿#include "VulkanCore.h"
 
-#include "Camera.h"
-
 VulkanCore::~VulkanCore()
 {
     VDevice = nullptr;
@@ -93,14 +91,14 @@ Camera* VulkanCore::GetCamera()
     return Get().IGetCamera();
 }
 
-void VulkanCore::SetVertexBuffer(VertexBuffer* vertexBuffer)
+void VulkanCore::SetModels(std::vector<ModelLoader>* models)
 {
-    Get().ISetVertexBuffer(vertexBuffer);
+    Get().ISetModels(models);
 }
 
-VertexBuffer* VulkanCore::GetVertexBuffer()
+std::vector<ModelLoader>* VulkanCore::GetModels()
 {
-    return Get().IGetVertexBuffer();
+    return Get().IGetModels();
 }
 
 void VulkanCore::ISetDevice(DeviceQuery* device)
@@ -158,7 +156,7 @@ void VulkanCore::ISetCommandBuffer(CommandBuffer* commandBuffer)
     VCommandBuffer = commandBuffer;
 }
 
-CommandBuffer* VulkanCore::IGetCommandBuffer()
+CommandBuffer* VulkanCore::IGetCommandBuffer() const
 {
     return VCommandBuffer;
 }
@@ -168,7 +166,7 @@ void VulkanCore::ISetPipeline(Pipelines* pipeline)
     VPipeline = pipeline;
 }
 
-Pipelines* VulkanCore::IGetPipeline()
+Pipelines* VulkanCore::IGetPipeline() const
 {
     return VPipeline;
 }
@@ -178,17 +176,17 @@ void VulkanCore::ISetCamera(Camera* camera)
     VCamera = camera;
 }
 
-Camera* VulkanCore::IGetCamera()
+Camera* VulkanCore::IGetCamera() const
 {
     return VCamera;
 }
 
-void VulkanCore::ISetVertexBuffer(VertexBuffer* vertexBuffer)
+void VulkanCore::ISetModels(std::vector<ModelLoader>* models)
 {
-    VVertexBuffer = vertexBuffer;
+    m_models = models;
 }
 
-VertexBuffer* VulkanCore::IGetVertexBuffer()
+std::vector<ModelLoader>* VulkanCore::IGetModels() const
 {
-    return VVertexBuffer;
+    return m_models;
 }

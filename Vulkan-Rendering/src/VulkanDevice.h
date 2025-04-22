@@ -19,7 +19,7 @@ public:
 
 private:
     void InitWindow();
-    void InitVulkan();
+    void InitVulkan() const;
     void MainLoop();
     void CleanUp() const;
 
@@ -28,15 +28,14 @@ private:
     const uint32_t WIDTH = 800;
     const uint32_t HEIGHT = 600;
     
-    CommandBuffer* VCommandBuffer;
-    DeviceQuery* VDeviceQuery;
-    VulkanInstance* VInstance;
-    VulkanSurface* VSurface;
-    SwapChain* VSwapChain;
-    RenderPass* VRenderPass;
-    Pipelines* VPipeline;
-    Camera* VCamera;
-    VertexBuffer* VVertexBuffer;
-    
-    ModelLoader* CastleModel;
+    CommandBuffer* m_commandBuffer;
+    DeviceQuery* m_deviceQuery;
+    VulkanInstance* m_instance;
+    VulkanSurface* m_surface;
+    SwapChain* m_swapChain;
+    RenderPass* m_renderPass;
+    Pipelines* m_pipeline;
+    Camera* m_camera;
+    ModelLoader* m_castleModel;
+    std::vector<ModelLoader>* m_models;
 };
