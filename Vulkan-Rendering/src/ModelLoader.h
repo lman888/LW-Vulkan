@@ -5,6 +5,7 @@
 //Project Includes
 class VertexBuffer;
 class IndexBuffer;
+class Texture;
 
 class ModelLoader
 {
@@ -20,6 +21,7 @@ public:
 
     VertexBuffer& GetModelVertex();
     IndexBuffer& GetModelIndex();
+    Texture& GetModelTexture();
 
 private:
 
@@ -29,4 +31,5 @@ private:
     
     VertexBuffer* m_modelVertex;
     IndexBuffer* m_modelIndices;
+    Texture* m_modelTexture;
 };
