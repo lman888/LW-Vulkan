@@ -5,9 +5,6 @@
 #include <array>
 #include "glm/gtc/matrix_transform.hpp"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
 //Project Includes
 #include "Camera.h"
 #include "CommandBuffer.h"
@@ -15,6 +12,7 @@
 #include "ModelLoader.h"
 #include "RenderPass.h"
 #include "SwapChain.h"
+#include "Texture.h"
 #include "VulkanCore.h"
 #include "VertexBuffer.h"
 
@@ -327,8 +325,13 @@ void Pipelines::CreateDescriptorSets()
 
         VkDescriptorImageInfo imageInfo{};
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView = textureImageView;
-        imageInfo.sampler = textureSampler;
+
+        //Find a better way to do this.
+        for (ModelLoader& model : *VulkanCore::GetModels())
+        {
+            imageInfo.imageView = model.GetModelTexture().GetImageView();
+            imageInfo.sampler = model.GetModelTexture().GetSampler();
+        }
         
         std::array<VkWriteDescriptorSet, 2> descriptionWrites{};
         descriptionWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

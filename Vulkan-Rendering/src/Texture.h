@@ -1,6 +1,8 @@
 #pragma once
 #include "VulkanIncludes.h"
 
+#include <string>
+
 class Texture
 {
 public:
@@ -16,6 +18,13 @@ public:
 	VkImageView CreateImageView(VkImage& image, VkFormat format, VkImageAspectFlags flags, uint32_t mipLevels);
 
 	void CreateDepthResource();
+
+	//Fix up later
+	VkImageView& GetImageView();
+	VkSampler& GetSampler();
+	VkImage& GetImage();
+	VkImageView& GetDepthImageView();
+	VkDeviceMemory& GetImageMemory();
 
 	void CleanUp();
 

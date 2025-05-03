@@ -129,6 +129,31 @@ void Texture::CreateDepthResource()
     m_depthImageView = CreateImageView(m_depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 }
 
+VkImageView& Texture::GetImageView()
+{
+    return m_textureImageView;
+}
+
+VkSampler& Texture::GetSampler()
+{
+    return m_textureSampler;
+}
+
+VkImage& Texture::GetImage()
+{
+    return m_textureImage;
+}
+
+VkImageView& Texture::GetDepthImageView()
+{
+    return m_depthImageView;
+}
+
+VkDeviceMemory& Texture::GetImageMemory()
+{
+    return m_textureImageMemory;
+}
+
 void Texture::CleanUp()
 {
     vkDestroySampler(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), m_textureSampler, nullptr);
