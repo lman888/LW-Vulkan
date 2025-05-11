@@ -179,7 +179,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Dependencies\TinyOBJLoader\tiny_obj_loader.cc" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\CommandBuffer.cpp" />
     <ClCompile Include="src\DeviceQuery.cpp" />

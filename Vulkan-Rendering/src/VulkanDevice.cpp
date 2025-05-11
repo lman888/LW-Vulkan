@@ -103,12 +103,11 @@ void VulkanDevice::InitVulkan() const
 
     VulkanCore::GetCommandBuffer()->CreateCommandPool();
     m_castleModel->GetModelTexture().CreateDepthResource();
+    VulkanCore::GetSwapChain()->CreateFrameBuffers();
 
     m_castleModel->GetModelTexture().CreateTextureImage("textures/viking_room.png");
     m_castleModel->GetModelTexture().CreateTextureImageView();
     m_castleModel->GetModelTexture().CreateTextureSampler();
-    
-    VulkanCore::GetSwapChain()->CreateFrameBuffers();
     m_castleModel->LoadModel("models/Castle/castle.obj");
     m_castleModel->CreateModelBuffers();
     

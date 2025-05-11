@@ -6,11 +6,9 @@
 
 //Project Includes
 #include "DeviceQuery.h"
-#include "ModelLoader.h"
 #include "Pipelines.h"
 #include "VulkanSurface.h"
 #include "RenderPass.h"
-#include "Texture.h"
 #include "VulkanCore.h"
 
 SwapChain::SwapChain()
@@ -116,26 +114,21 @@ void SwapChain::CreateFrameBuffers()
     swapChainFrameBuffers.resize(swapChainImageViews.size());
     for (size_t i = 0; i < swapChainFrameBuffers.size(); i++)
     {
-        //Fix this later
-        for (ModelLoader& model : *VulkanCore::GetModels())
+        std::array<VkImageView, 2> attachments= { swapChainImageViews[i], VulkanCore::GetPipeline()->GetImageView() };
+
+        VkFramebufferCreateInfo frameBufferInfo{};
+        frameBufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        frameBufferInfo.renderPass = VulkanCore::GetRenderPass()->GetVulkanRenderPass();
+        frameBufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        frameBufferInfo.pAttachments = attachments.data();
+        frameBufferInfo.width = swapChainExtent.width;
+        frameBufferInfo.height = swapChainExtent.height;
+        frameBufferInfo.layers = 1;
+
+        if (vkCreateFramebuffer(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), &frameBufferInfo, nullptr, &swapChainFrameBuffers[i]) != VK_SUCCESS)
         {
-            VkFramebufferCreateInfo frameBufferInfo{};
-            std::array<VkImageView, 2> attachments = { swapChainImageViews[i], model.GetModelTexture().GetDepthImageView() };
-            
-            frameBufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            frameBufferInfo.renderPass = VulkanCore::GetRenderPass()->GetVulkanRenderPass();
-            frameBufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
-            frameBufferInfo.pAttachments = attachments.data();
-            frameBufferInfo.width = swapChainExtent.width;
-            frameBufferInfo.height = swapChainExtent.height;
-            frameBufferInfo.layers = 1;
-
-            if (vkCreateFramebuffer(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), &frameBufferInfo, nullptr, &swapChainFrameBuffers[i]) != VK_SUCCESS)
-            {
-                throw std::runtime_error("Failed to create a Framebuffer!");
-            }
+            throw std::runtime_error("Failed to create a Framebuffer!");
         }
-
     }
 }
 
@@ -180,11 +173,7 @@ void SwapChain::CreateImageViews()
 
     for (size_t i = 0; i < swapChainImages.size(); i++)
     {
-        //Fix this later
-        for (ModelLoader& model : *VulkanCore::GetModels())
-        {
-            swapChainImageViews[i] = model.GetModelTexture().CreateImageView(swapChainImages[i], swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
-        }
+        swapChainImageViews[i] = VulkanCore::GetPipeline()->CreateImageView(swapChainImages[i], swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
     }
 }
 
@@ -206,13 +195,7 @@ void SwapChain::ReCreateSwapChain(GLFWwindow* window)
     
     CreateSwapChain(window);
     CreateImageViews();
-
-    //Fix this later
-    for (ModelLoader& model : *VulkanCore::GetModels())
-    {
-        model.GetModelTexture().CreateDepthResource();
-    }
-    
+    VulkanCore::GetPipeline()->CreateDepthResource();
     CreateFrameBuffers();
 }
 
@@ -248,14 +231,10 @@ VkExtent2D& SwapChain::GetSwapChainImageExtent()
 
 void SwapChain::CleanUpSwapChain()
 {
-    //Fix this later
-    for (ModelLoader& model : *VulkanCore::GetModels())
-    {        
-        vkDestroyImageView(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), model.GetModelTexture().GetImageView(), nullptr);
-        vkDestroyImage(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), model.GetModelTexture().GetImage(), nullptr);
-        vkFreeMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), model.GetModelTexture().GetImageMemory(), nullptr);
-        
-    }
+    vkDestroyImageView(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), VulkanCore::GetPipeline()->GetImageView(), nullptr);
+    vkDestroyImage(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), VulkanCore::GetPipeline()->GetImage(), nullptr);
+    vkFreeMemory(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), VulkanCore::GetPipeline()->GetImageMemory(), nullptr);
+    
     for (VkFramebuffer& swapChainFrameBuffer : swapChainFrameBuffers)
     {
         vkDestroyFramebuffer(VulkanCore::GetChosenDevice()->GetChosenGPUDevice(), swapChainFrameBuffer, nullptr);

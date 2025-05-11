@@ -23,7 +23,7 @@ void ModelLoader::LoadModel(const std::string modelPath)
     std::vector<tinyobj::material_t> materials;
     std::string warn, err;
 
-    if (!LoadObj(&attrib, &shapes, &materials, &warn, &err, modelPath.c_str()))
+    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, modelPath.c_str()))
     {
         throw std::runtime_error(warn + err);
     }
