@@ -186,7 +186,6 @@
     <ClCompile Include="src\ModelLoader.cpp" />
     <ClCompile Include="src\Pipelines.cpp" />
     <ClCompile Include="src\RenderPass.cpp" />
-    <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\VertexBuffer.cpp" />
     <ClCompile Include="src\Vulkan-Rendering.cpp" />
     <ClCompile Include="src\VulkanCore.cpp" />
@@ -278,7 +277,6 @@
     <ClInclude Include="src\ModelLoader.h" />
     <ClInclude Include="src\Pipelines.h" />
     <ClInclude Include="src\RenderPass.h" />
-    <ClInclude Include="src\Texture.h" />
     <ClInclude Include="src\VertexBuffer.h" />
     <ClInclude Include="src\VulkanCore.h" />
     <ClInclude Include="src\VulkanDevice.h" />

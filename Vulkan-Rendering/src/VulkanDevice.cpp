@@ -10,7 +10,6 @@
 #include "CommandBuffer.h"
 #include "Camera.h"
 #include "ModelLoader.h"
-#include "Texture.h"
 
 static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 {
@@ -102,12 +101,12 @@ void VulkanDevice::InitVulkan() const
     VulkanCore::GetPipeline()->CreateGraphicsPipeline();
 
     VulkanCore::GetCommandBuffer()->CreateCommandPool();
-    m_castleModel->GetModelTexture().CreateDepthResource();
+    VulkanCore::GetPipeline()->CreateDepthResource();
     VulkanCore::GetSwapChain()->CreateFrameBuffers();
-
-    m_castleModel->GetModelTexture().CreateTextureImage("textures/viking_room.png");
-    m_castleModel->GetModelTexture().CreateTextureImageView();
-    m_castleModel->GetModelTexture().CreateTextureSampler();
+    VulkanCore::GetPipeline()->CreateTextureImage("textures/viking_room.png");
+    VulkanCore::GetPipeline()->CreateTextureImageView();
+    VulkanCore::GetPipeline()->CreateTextureSampler();
+    
     m_castleModel->LoadModel("models/Castle/castle.obj");
     m_castleModel->CreateModelBuffers();
     

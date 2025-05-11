@@ -35,16 +35,34 @@ public:
     void UpdateUniformBuffer(uint32_t currentFrame) const;
     void CreateDescriptorPool();
     void CreateDescriptorSets();
-
+    void CreateTextureImage(const std::string texture);
+    void CreateTextureImageView();
+    void CreateTextureSampler();
+    void CreateDepthResource();
+    
+    VkImageView CreateImageView(VkImage& image, VkFormat format, VkImageAspectFlags flags, uint32_t mipLevels); 
+    
     VkPipelineLayout& GetPipelineLayout();
     VkPipeline& GetGraphicsPipeline();
+    VkImageView& GetImageView();
+    VkImage& GetImage();
+    VkDeviceMemory& GetImageMemory();
 
     //Fix This
+    uint32_t GetMipLevels();
     std::vector<VkDescriptorSet>& GetDescriptorSets();
 
     void CleanUp() const;
 
 private:
+
+    void CreateImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+
+    void TransitionImageLayout(VkImage& image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
+
+    void CopyBufferToImage(VkBuffer& buffer, VkImage& image, uint32_t width, uint32_t height);
+
+    void GenerateMipmaps(VkImage& image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
     
     static std::vector<char> ReadFile(const std::string& fileName);
     VkShaderModule CreateShaderModule(const std::vector<char>& code);
@@ -52,6 +70,15 @@ private:
     VkDescriptorSetLayout descriptorSetLayout;
     VkPipelineLayout pipelineLayout;
     VkPipeline graphicsPipeline;
+
+    uint32_t mipLevels;
+    VkImage textureImage;
+    VkDeviceMemory textureImageMemory;
+    VkImageView textureImageView;
+    VkSampler textureSampler;
+    VkImage depthImage;
+    VkDeviceMemory depthImageMemory;
+    VkImageView depthImageView;
     
     VkDescriptorPool descriptorPool;
     std::vector<VkDescriptorSet> descriptorSets;

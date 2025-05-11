@@ -7,13 +7,11 @@
 //Project Includes
 #include "IndexBuffer.h"
 #include "VertexBuffer.h"
-#include "Texture.h"
 
 ModelLoader::ModelLoader()
 {
     m_modelIndices = new IndexBuffer();
     m_modelVertex = new VertexBuffer();
-    m_modelTexture = new Texture();
 }
 
 void ModelLoader::LoadModel(const std::string modelPath)
@@ -69,11 +67,9 @@ void ModelLoader::CleanUp()
 {
     m_modelVertex->CleanUp();
     m_modelIndices->CleanUp();
-    m_modelTexture->CleanUp();
 
     m_modelVertex = nullptr;
     m_modelIndices = nullptr;
-    m_modelTexture = nullptr;
 }
 
 VertexBuffer& ModelLoader::GetModelVertex()
@@ -84,11 +80,6 @@ VertexBuffer& ModelLoader::GetModelVertex()
 IndexBuffer& ModelLoader::GetModelIndex()
 {
     return *m_modelIndices;
-}
-
-Texture& ModelLoader::GetModelTexture()
-{
-    return *m_modelTexture;
 }
 
 void ModelLoader::CreateModelVertexBuffer() const
